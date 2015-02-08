@@ -143,6 +143,25 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}	
 	}
 
+	module drawExtractor(xaxis=0, yaxis=0, h=2, y=VSlotWheelSpacing20x40)
+	{
+			for (i = [-1,1]) 
+			{
+				assign(wp=i*10,hp=5) {
+					render() translate([plate_width(type)/2+wp+i*45,y+0,-0.02]) 
+						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
+						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
+				}
+			}						
+			for (i = [0,1]) 
+			{
+				assign(wp=10,hp=5) {
+					render() translate([plate_width(type)/2-5,(plate_height(type)-3)*i-0.5,-0.02]) 
+						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
+						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
+				}
+			}
+	}
 
 	module drawBrims(xaxis=0, yaxis=0, brimHeight=0.2)
 	{
@@ -159,7 +178,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 //					assign(wp=i*55,hp=55, ww=10) {
 //					#translate([plate_width(type)/2-wp+i*(wp+9),plate_height(type)-hp-5,0]) 
 //							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-//							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
+							//polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
 //					}
 //				}
 //				if (yaxis && i==-1) {
@@ -176,7 +195,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 //						polygon(points=[[0,0],[wp,0],[wp,hp],[wp-i*ww,hp],[wp-i*ww,ww],[0,ww]]);
 //				}
 				assign(wp=i*10,hp=35) {
-					#translate([plate_width(type)/2+wp+i*48,-0,0]) 
+					translate([plate_width(type)/2+wp+i*48,-0,0]) 
 						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
 				}
@@ -233,6 +252,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			
 			translate([0,0,0]) XAxisEndstop(0);
 		
+			drawExtractor(yaxis=1);
 		
 			// Plate Spring part
 			if(VSlotSpacingAdjustPartType==1)
@@ -364,6 +384,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			
 			addSpacer(wheel=0);
 
+			drawExtractor(xaxis=1);
 
 			// Plate Spring part
 			if(VSlotSpacingAdjustPartType==1)
@@ -693,10 +714,10 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}	
 	}
 	
-	module ToolMountingOne(w=10)
+	module ToolMountingOne(w=10, hole="M3")
 	{
 		/* Monting tool */
-		translate([0, 0, PlateThickness-3]) drawHul("M2.5", l=PlateThickness+3, gap=w);
+		translate([0, 0, PlateThickness-3]) drawHul(hole, l=PlateThickness+3, gap=w);
 	
 	}
 
@@ -708,7 +729,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		if (endstop==0) {
 			for (i = [-1, 1]) 
 			{
-				translate([i*9.5,-2,0]) rotate([0,0,0]) ToolMountingOne(w=5);
+				translate([i*9.5,-2,0]) rotate([0,0,0]) ToolMountingOne(w=5, hole="M2.5");
 			}
 		}
 	}
@@ -724,7 +745,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			{
 				for (i = [-1, 1]) 
 				{
-					translate([3,i*9.5,0])  rotate([0,0,0]) M3Hole(l=PlateThickness+2);//ToolMountingOne(w=5);
+					translate([3,i*9.5,0])  rotate([0,0,0]) M3Hole(l=PlateThickness+2);
 				}
 				translate([-19,-21,0])  cube([15,42,PlateThickness+2]);
 			}
@@ -732,12 +753,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	}
 	
 	
-	module ToolMounting(width=0, MountingTool_x=5, MountingTool_y=52)
+	module ToolMounting(width=0, MountingTool_x=8, MountingTool_y=52)
 	{
 		for (i = [-1, 1]) 
 		{
 			/* Monting tool */
 			translate([width/2+i*(width/2-MountingTool_x),MountingTool_y, 0])  ToolMountingOne(w=10);
+			translate([width/2+i*(width/2-MountingTool_x),MountingTool_y+40, 0])  ToolMountingOne(w=10);
 		}
 	}
 	
