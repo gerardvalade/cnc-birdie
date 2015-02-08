@@ -76,7 +76,7 @@ VSlotSpacingAdjustPartType = 1;
 VSlotWheelMount_y=11+VSlotWheelSpacing20x40/2;
 showExtra=0;
 showModule=0;
-addBrims=0;
+addBrims=1;
 
 module _plate(type) // plate_type(type), plate_width(type), plate_height(type)) 
 {
@@ -148,32 +148,37 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 			for (i = [-1,1]) 
 			{
-				if (xaxis) {
-					assign(wp=i*30,hp=30, ww=10) {
-					translate([plate_width(type)/2+wp+i*5,plate_height(type)-hp-1,0]) 
-							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
-					}
-				}
-				if (yaxis && i==1) {
-					assign(wp=i*55,hp=55, ww=10) {
-					translate([plate_width(type)/2-wp+i*(wp+9),plate_height(type)-hp-5,0]) 
-							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
-					}
-				}
-				if (yaxis && i==-1) {
-					assign(wp=i*15,hp=15, ww=10) {
-					translate([plate_width(type)/2+wp+i*34,plate_height(type)-hp-5,0]) 
-							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-							//polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
-						polygon(points=[[wp-i*ww,0],[wp,0],[wp,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[wp-i*ww,hp]]);
-					}
-				}
-				assign(wp=i*30,hp=40, ww=10) {
-					translate([plate_width(type)/2+wp+i*5,-5,0]) 
+//				if (xaxis) {
+//					assign(wp=i*30,hp=30, ww=10) {
+//					#translate([plate_width(type)/2+wp+i*5,plate_height(type)-hp-1,0]) 
+//							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
+//							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
+//					}
+//				}
+//				if (yaxis && i==1) {
+//					assign(wp=i*55,hp=55, ww=10) {
+//					#translate([plate_width(type)/2-wp+i*(wp+9),plate_height(type)-hp-5,0]) 
+//							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
+//							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
+//					}
+//				}
+//				if (yaxis && i==-1) {
+//					assign(wp=i*15,hp=15, ww=10) {
+//					#translate([plate_width(type)/2+wp+i*34,plate_height(type)-hp-5,0]) 
+//							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
+//							//polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
+//						polygon(points=[[wp-i*ww,0],[wp,0],[wp,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[wp-i*ww,hp]]);
+//					}
+//				}
+//				assign(wp=i*30,hp=40, ww=10) {
+//					#translate([plate_width(type)/2+wp+i*5,-5,0]) 
+//						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
+//						polygon(points=[[0,0],[wp,0],[wp,hp],[wp-i*ww,hp],[wp-i*ww,ww],[0,ww]]);
+//				}
+				assign(wp=i*10,hp=35) {
+					#translate([plate_width(type)/2+wp+i*48,-0,0]) 
 						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-						polygon(points=[[0,0],[wp,0],[wp,hp],[wp-i*ww,hp],[wp-i*ww,ww],[0,ww]]);
+						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
 				}
 			}
 		

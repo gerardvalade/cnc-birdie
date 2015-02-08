@@ -18,10 +18,10 @@ include <scad/PlateAxis.scad>
 use <scad/vslot.scad>
 use <scad/vitamins/stepper-motors.scad>
 
-showExtra=1;
-showModule=1;
+showExtra=0;
+showModule=0;
 cutView=0;
-exploded=1;
+exploded=0;
 
 module platesYAxis_test()
 {
@@ -68,7 +68,7 @@ module allplates_test()
 }
 
 $fn=30;
-//allplates_test();
-ZAxisMountView(t=0);
+allplates_test();
+//ZAxisMountView(t=0);
 //XAxisEndstopHolder();
 //PlateXAxisFront();
