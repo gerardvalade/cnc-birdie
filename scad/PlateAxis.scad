@@ -59,7 +59,6 @@ VSlotSpacingAdjustThickness=12;
 VSlotWheelSpacing20x40=59.60; 
 
 
-Minkowski_r=3;
 Hole_Plate=PlateThickness+4;
 color_module_plateX       		= "LawnGreen";//[0.87, 0.27, 0.3];
 color_module_plateY       		= "ForestGreen";//[0.87, 0.27, 0.3];
@@ -89,26 +88,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			difference() 
 			{
 				union() {
-					minkowski()
-					{
-						translate([Minkowski_r,Minkowski_r])
-						cube([w1-2*Minkowski_r,height-2*Minkowski_r,PlateThickness]);
-				   	cylinder(r=Minkowski_r,h=1);
-					}
-					minkowski()
-					{
-						translate([Minkowski_r,Minkowski_r])
+						cube([w1,height,PlateThickness]);
+
 						translate([plate_width(type)/2-w2/2,0,PlateThickness]) 
-						cube([w2-2*Minkowski_r,height-2*Minkowski_r,PlateThickness]);
-				   	cylinder(r=Minkowski_r,h=1);
-					}
-					minkowski()
-					{
-						translate([Minkowski_r,Minkowski_r])
+						cube([w2,height,PlateThickness]);
+
 						translate([plate_width(type)-w1,0,0]) 
-						cube([w1-2*Minkowski_r,height-2*Minkowski_r,PlateThickness]);
-				   	cylinder(r=Minkowski_r,h=1);
-					}
+						cube([w1,height,PlateThickness]);
 				}
 				translate([plate_width(type)/2,height/2]) 
 				VSlotMountBottomPlate(width=plate_width(type)-15);
@@ -218,29 +204,24 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					VSlotSpacingAdjustPart();
 				}
 
-				minkowski()
+				difference() 
 				{
-					difference() 
-					{
-						translate([Minkowski_r,Minkowski_r])
-			   				cube([plate_width(type)-2*Minkowski_r,plate_height(type)-2*Minkowski_r,PlateThickness]);
+	   				cube([plate_width(type),plate_height(type),PlateThickness]);
 
-						translate([plate_width(type)/2+10,plate_height(type)-50,-1]) 
-							assign(wp=50,hp=50) {
-									rotate([0,0,0]) linear_extrude(height = PlateThickness+2, center = false, convexity = 0, twist = 0)
-									polygon(points=[[wp,0],[wp,hp],[0,hp]], paths=[[0,1,2,3,4,5]]);
-							}
+					translate([plate_width(type)/2+10,plate_height(type)-50,-1]) 
+						assign(wp=50.1,hp=50.1) {
+								rotate([0,0,0]) linear_extrude(height = PlateThickness+2, center = false, convexity = 0, twist = 0)
+								polygon(points=[[wp,0],[wp,hp],[0,hp]], paths=[[0,1,2,3,4,5]]);
+						}
 
-						if(VSlotSpacingAdjustPartType==2) {
-							assign(w1=plate_width(type)/3) {
-								translate([0,0,-1])	
-								cube([w1,30,PlateThickness+2]);
-								translate([plate_width(type)-w1,0,-1])	
-								cube([w1,30,PlateThickness+2]);
-							}
+					if(VSlotSpacingAdjustPartType==2) {
+						assign(w1=plate_width(type)/3) {
+							translate([-0.1,-0.1,-0.1])	
+							cube([w1,30,PlateThickness+2]);
+							translate([plate_width(type)-w1+0.1,-0.1,-1])	
+							cube([w1,30,PlateThickness+2]);
 						}
 					}
-			   		cylinder(r=Minkowski_r,h=1);
 				}
 			} // end union
 
@@ -289,7 +270,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 		module M5BoltSpacer()
 		{
-			translate([0, 0, -39]) shim(10,5,h,"spacer", "Spacer");
+			translate([0, 0, -39]) shim(10,5,60,"spacer", "Spacer");
 			translate([0, 0, -2.5])  drawBolt("M5x80", 73);
 		}
 
@@ -340,36 +321,27 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 				addSpacer(wheel=-1);
 
 			
-				minkowski()
+				difference() 
 				{
-					difference() 
+	   				cube([plate_width(type),plate_height(type),PlateThickness]);
+	   				
+					for (i = [-1,1]) 
 					{
-						union() {
-
-							translate([Minkowski_r,Minkowski_r])
-				   				cube([plate_width(type)-2*Minkowski_r,plate_height(type)-2*Minkowski_r,PlateThickness]);
-			   			}
-						for (i = [-1,1]) 
-						{
-							translate([plate_width(type)/2+i*35,plate_height(type)-28,-1]) 
-								assign(wp=i*30,hp=30) {
-									rotate([0,0,0]) linear_extrude(height = PlateThickness*2, center = false, convexity = 0, twist = 0)
-									polygon(points=[[wp,0],[wp,hp],[0,hp]], paths=[[0,1,2,3,4,5]]);
-								}
-						}
-									
-						if(VSlotSpacingAdjustPartType==2) {
-							assign(w1=plate_width(type)/3) {
-								translate([0,0,-1])	
-								cube([w1,30,PlateThickness+2]);
-								translate([plate_width(type)-w1,0,-1])	
-								cube([w1,30,PlateThickness+2]);
+						translate([plate_width(type)/2+i*35,plate_height(type)-28,-1]) 
+							assign(wp=i*30,hp=30) {
+								rotate([0,0,0]) linear_extrude(height = PlateThickness*2, center = false, convexity = 0, twist = 0)
+								polygon(points=[[wp,0],[wp,hp],[0,hp]], paths=[[0,1,2,3,4,5]]);
 							}
-						}
-						
-						
 					}
-			   		cylinder(r=Minkowski_r,h=1);
+								
+					if(VSlotSpacingAdjustPartType==2) {
+						assign(w1=plate_width(type)/3) {
+							translate([-0.1,-0.1,-1])	
+							cube([w1,30,PlateThickness+2]);
+							translate([plate_width(type)-w1+0.1,-0.1,-1])	
+							cube([w1,30,PlateThickness+2]);
+						}
+					}
 				}
 			} // end union
 
@@ -933,14 +905,9 @@ module AntiBacklash(width=35,height=22,thick=60)
 	{
 		translate([-width/2,0,0]) difference() {
 				
-			color(color_module_anitbacklash_cover) union() {
-				translate([Minkowski_r,Minkowski_r,0])  minkowski()
-				{
-		   			cube([width-2*Minkowski_r,height-2*Minkowski_r,4],center=false);
-			   		cylinder(r=Minkowski_r,h=1);
-				}
+			color(color_module_anitbacklash_cover) 
+		   			cube([width,height,4],center=false);
 			
-			}
 			translate([width/2,height/2,-0.1]) rotate([0,0,0]) { 
 				cylinder(r=4.9,h=5.5);
 			}
@@ -980,14 +947,8 @@ module AntiBacklash(width=35,height=22,thick=60)
 	{
 		color(color_module_anitbacklash) translate([-width/2,thick/2,0]) rotate([90,0,0]) difference() 
 		{	
-			union() {
-				translate([Minkowski_r,Minkowski_r,0]) minkowski()
-				{
-		   			cube([width-2*Minkowski_r,height-2*Minkowski_r,thick-1],center=false);
-			   		cylinder(r=Minkowski_r,h=1);
-				}
+   			cube([width,height,thick-1],center=false);
 			
-			}
 			translate([width/2,height/2,-0.1]) rotate([0,0,0]) { 
 				cylinder(r=4.5,h=thick+2);
 				rotate([0,0,90])  {
@@ -1023,18 +984,13 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 		color(color_module_nema_holder) union() {
 			
 			translate([0,28,thick/2-0.5]) { 
-				minkowski()
+				difference()
 				{
-					difference()
-					{
-						assign(wp=width/2-Minkowski_r,hp=height/2,hp2=25) {
-							linear_extrude(height = thick, center = true, convexity = 0, twist = 0)
-							polygon(points=[[-wp,-hp],[wp,-hp],[wp,0],[10,hp2],[-10,hp2],[-wp,0]], paths=[[0,1,2,3,4,5]]);
-						}
+					assign(wp=width/2,hp=height/2,hp2=25) {
+						linear_extrude(height = thick, center = true, convexity = 0, twist = 0)
+						polygon(points=[[-wp,-hp],[wp,-hp],[wp,0],[10,hp2],[-10,hp2],[-wp,0]], paths=[[0,1,2,3,4,5]]);
 					}
-			   		cylinder(r=Minkowski_r,h=1);
 				}
-				
 			}
 			
 			translate([0,posNema,thick])  rotate([0,0,45]) {

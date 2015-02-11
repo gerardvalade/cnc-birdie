@@ -23,7 +23,7 @@ plate_color = [0.6, 0.4, 0];
 
 showExtra=1;
 showModule=1;
-cutView=0;
+cutView=1;
 exploded=0;
 addBrims=0;
 $t=0.0;
@@ -73,11 +73,11 @@ module CNC()
 //					if (i == 1)
 //						#translate([j*10,0,-17]) rotate([180,0,0])  drawScrew("M5x20");
 					if (i == -1)
-						translate([j*10,0,-9]) rotate([180,0,0])  drawScrew("M5x20");
+						translate([j*10,0,-8]) rotate([180,0,0])  drawScrew("M5x20");
 //					if (i == 1)
 //						translate([j*10,0,517]) rotate([0,0,0])  drawScrew("M5x20");
 					if (i == -1)
-						translate([j*10,0,509]) rotate([0,0,0])  drawScrew("M5x20");
+						translate([j*10,0,508]) rotate([0,0,0])  drawScrew("M5x20");
 				}
 				if (i == 1) {
 				translate([20,0,-8])  rotate([0,180,90]) BeltHolderXAxis();

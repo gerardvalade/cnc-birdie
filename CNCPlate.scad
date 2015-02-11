@@ -18,9 +18,9 @@ include <scad/PlateAxis.scad>
 use <scad/vslot.scad>
 use <scad/vitamins/stepper-motors.scad>
 
-showExtra=0;
-showModule=0;
-cutView=0;
+showExtra=1;
+showModule=1;
+cutView=1;
 exploded=0;
 
 module platesYAxis_test()

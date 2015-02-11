@@ -194,9 +194,6 @@ module precisionShim10x5x1() {
 	shim(10,5,1,"precision-shim", "Precision Shim");
 }
 
-module precisionShim10x5x3() {
-	shim(10,5,3,"precision-shim", "Precision Shim");
-}
 
 module precisionShim10x5x10() {
 	shim(10,5,10,"precision-shim", "Precision Shim");
@@ -249,7 +246,7 @@ module beltBearing10(h) {
 		translate([0, 0, 13]) precisionShim10x5x1();
 		translate([0, 0, 16]) ballBearing625_2rs();
 		translate([0, 0, 18]) { 
-			drawBolt("M5x35", posNut=29);
+			drawBolt("M5x35", posNut=28);
 		}
 	}
 }
