@@ -129,20 +129,20 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}	
 	}
 
-	module drawExtractor(xaxis=0, yaxis=0, h=2, y=VSlotWheelSpacing20x40)
+	module drawExtractor(xaxis=0, yaxis=0, h=1.5, y=VSlotWheelSpacing20x40)
 	{
 			for (i = [-1,1]) 
 			{
-				assign(wp=i*10,hp=5) {
-					render() translate([plate_width(type)/2+wp+i*45,y+0,-0.02]) 
+				assign(wp=i*5,hp=5) {
+					render() translate([plate_width(type)/2+wp+i*50.05,y+0,-0.02]) 
 						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
 				}
 			}						
 			for (i = [0,1]) 
 			{
-				assign(wp=10,hp=5) {
-					render() translate([plate_width(type)/2-5,(plate_height(type)-3)*i-0.5,-0.02]) 
+				assign(wp=5,hp=5) {
+					render() translate([plate_width(type)/2-wp/2,(plate_height(type)-(hp-0.1))*i-0.05,-0.02]) 
 						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
 				}

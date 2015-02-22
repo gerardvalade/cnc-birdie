@@ -23,7 +23,7 @@ plate_color = [0.6, 0.4, 0];
 
 showExtra=1;
 showModule=1;
-cutView=1;
+cutView=0;
 exploded=0;
 addBrims=0;
 $t=0.0;
