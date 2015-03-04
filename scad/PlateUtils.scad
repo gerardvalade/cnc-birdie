@@ -152,7 +152,7 @@ module drawBoltLowProfile(name, posNut=10)
 }
 
 /* Nema Hole */
-module NemaHolder(depth=10, nemaHoldeRad=5, nema17=true, nema23=true, gap=2, showMotor=0, rot=0, mat=[[-1, 1],[-1, -1],[1, 1],[1,-1]]) {
+module NemaHolder(depth=10, nemaHoldeRad=11.8, nema17=true, nema23=false, gap=0, showMotor=0, rot=0, mat=[[-1, 1],[-1, -1],[1, 1],[1,-1]]) {
 	
 	
 	if (showMotor) {

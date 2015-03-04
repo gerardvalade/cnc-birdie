@@ -211,7 +211,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					translate([plate_width(type)/2+10,plate_height(type)-50,-1]) 
 						assign(wp=50.1,hp=50.1) {
 								rotate([0,0,0]) linear_extrude(height = PlateThickness+2, center = false, convexity = 0, twist = 0)
-								polygon(points=[[wp,0],[wp,hp],[0,hp]], paths=[[0,1,2,3,4,5]]);
+								polygon(points=[[wp,0],[wp,hp],[0,hp]]);
+						}
+
+					translate([plate_width(type)/2+20,plate_height(type)-50,-1]) 
+						assign(wp=25.1,hp=25.1,hh=12) {
+								rotate([0,0,0]) linear_extrude(height = PlateThickness+2, center = false, convexity = 0, twist = 0)
+								polygon(points=[[wp,0],[0,hp],[0,hp-hh],[wp-hh,0]]);
 						}
 
 					if(VSlotSpacingAdjustPartType==2) {
@@ -222,6 +228,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 							cube([w1,30,PlateThickness+2]);
 						}
 					}
+					
+					translate([plate_width(type)/2, 45, -0.02]) 
+						hull () {
+							translate([-15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+							translate([15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+						}
+					
 				}
 			} // end union
 
@@ -342,6 +355,14 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 							cube([w1,30,PlateThickness+2]);
 						}
 					}
+					
+					if(ModuleTypeXAxisBack(type))
+						translate([plate_width(type)/2, 45, -0.02]) 
+							hull () {
+								translate([-15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+								translate([15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+							}
+					
 				}
 			} // end union
 
@@ -400,8 +421,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			cube([30,22,15], centrer=true);
 			for (i = [-1, 1]) 
 			{
-				translate([i*10+15,16,-1]) 
-				rotate(45) cube([6,6,18]);
+				translate([i*10+15,16,-1]) 	rotate(45) cube([6,6,18]);
 			}
 		}	
 		
@@ -654,9 +674,8 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			if (withNemaMotor)
 			{
 				
-				
 				if (!wheel)
-					translate([i*((NEMA17HolesSpacing/2)+5),VSlotWheelSpacing20x40/2+5,-0.02]) 
+					translate([i*((NEMA17HolesSpacing/2)+5),VSlotWheelSpacing20x40/2,-0.02]) 
 						BeltBearingHole(h=Hole_Plate, wheel=0);
 				
 				translate([i*((NEMA17HolesSpacing/2)+5),VSlotWheelSpacing20x40/2+21,-0.02]) 
@@ -672,13 +691,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					if (ModuleTypeXAxisBack(type))
 					{
 						translate([0,VSlotWheelSpacing20x40/2+NEMA23HolesSpacing/2+19,PlateThickness+1]) 
-								rotate([0,180,0]) NemaHolder(depth=Hole_Plate, showMotor=wheel, nema23=false, rot=45);
+								rotate([0,180,0]) NemaHolder(depth=Hole_Plate, showMotor=wheel, rot=45);
 						
 					} 
 					else 
 					{
 						translate([0,VSlotWheelSpacing20x40/2+NEMA23HolesSpacing/2+19,PlateThickness]) 
-								rotate([0,180,0]) NemaHolder(depth=Hole_Plate, showMotor=wheel, nema23=false, rot=45);
+								rotate([0,180,0]) NemaHolder(depth=Hole_Plate, showMotor=wheel, rot=45);
 					
 					}
 				}
@@ -748,13 +767,12 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 		for (i = [-1, 1]) 
 		{
-			//GVA
 			translate([posX-10+i*(posX-10),0]) cube([20,posY,VSlotSpacingAdjustThickness]);
 			if (ModuleTypeXAxisFront(type)) 
 				translate([posX-5+i*(posX-5),23,0]) cube([10,13,VSlotSpacingAdjustThickness]);
 			else
 				translate([posX-5+i*(posX-5),23,0]) cube([10,13,VSlotSpacingAdjustThickness+6]);
-			translate([posX-8+i*(posX-8),VSlotWheelSpacing20x40+2,0]) cube([16,18,VSlotSpacingAdjustThickness]);
+			translate([posX-7.49+i*(posX-7.52),VSlotWheelSpacing20x40+3.5,0]) cube([15,15,VSlotSpacingAdjustThickness]);
 
 		}
 	}
