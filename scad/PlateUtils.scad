@@ -39,13 +39,13 @@ NEMA23HolesSpacing=47.14;
 
 exploded=0;
 
-// clearance  : desc, cld=dia clearance, clk=dia clearance 
+// clearance  : desc, cld=dia clearance, clk=dia hexagone clearance 
 data_screw_cl = [
-                ["M2.5",  0.20,  0.20],
-                ["M3",    0.30,  0.25],
-                ["M4",    0.30,  0.30],
-                ["M5",    0.30,  0.30],
-                ["M8",    0.32,  0.30]
+                ["M2.5",  0.30,  0.20],
+                ["M3",    0.40,  0.25],
+                ["M4",    0.40,  0.30],
+                ["M5",    0.40,  0.30],
+                ["M8",    0.42,  0.30]
                 ];
 function _get_cl(n)  = data_screw_cl[search([n], data_screw_cl)[0]];
 function _get_cld(n) = _get_cl(n)[1]; // dia clearance 
@@ -152,7 +152,7 @@ module drawBoltLowProfile(name, posNut=10)
 }
 
 /* Nema Hole */
-module NemaHolder(depth=10, nemaHoldeRad=11.8, nema17=true, nema23=false, gap=0, showMotor=0, rot=0, mat=[[-1, 1],[-1, -1],[1, 1],[1,-1]]) {
+module NemaHolder(depth=10, nemaHoldeRad=11.4, nema17=true, nema23=false, gap=0, showMotor=0, rot=0, mat=[[-1, 1],[-1, -1],[1, 1],[1,-1]]) {
 	
 	
 	if (showMotor) {

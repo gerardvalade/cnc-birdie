@@ -16,5 +16,10 @@
 
 include <scad/PlateAxis.scad>
 
+showExtra=0;
+showModule=0;
+cutView=0;
+exploded=0;
+
 $fn=30;
 ZAxisPlateMotorHolder();

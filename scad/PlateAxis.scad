@@ -674,13 +674,20 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			if (withNemaMotor)
 			{
 				
-				if (!wheel)
-					translate([i*((NEMA17HolesSpacing/2)+5),VSlotWheelSpacing20x40/2,-0.02]) 
-						BeltBearingHole(h=Hole_Plate, wheel=0);
-				
-				translate([i*((NEMA17HolesSpacing/2)+5),VSlotWheelSpacing20x40/2+21,-0.02]) 
-					BeltBearingHole(h=Hole_Plate, wheel=wheel);
-				
+				assign(ww=20) {
+					if (!wheel) {
+						hull()
+						{
+							translate([i*ww,VSlotWheelSpacing20x40/2,-0.02]) 
+								BeltBearingHole(h=Hole_Plate, wheel=0);
+							translate([i*ww,VSlotWheelSpacing20x40/2+21,-0.02]) 
+								BeltBearingHole(h=Hole_Plate, wheel=0);
+						}
+					} else {
+						translate([i*ww,VSlotWheelSpacing20x40/2+21,-0.02]) 
+							BeltBearingHole(h=Hole_Plate, wheel=wheel);
+					}
+				}
 
 				if (i==1 && (wheel == 0 || showExtra))
 				{
@@ -994,14 +1001,14 @@ module AntiBacklash(width=35,height=22,thick=60)
 	}
 }
 
-module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=22, mat=[[-1, 1],[1, 1],[1,-1]])
+module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=22, mat=[[-1, 1],[1, 1],[1,-1],[-1,-1]])
 {
 
 	difference() 
 	{	
 		color(color_module_nema_holder) union() {
 			
-			translate([0,28,thick/2-0.5]) { 
+			translate([0,28,thick/2]) { 
 				difference()
 				{
 					assign(wp=width/2,hp=height/2,hp2=25) {
@@ -1012,18 +1019,18 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 			}
 			
 			translate([0,posNema,thick])  rotate([0,0,45]) {
-				translate([16,-11,0]) rotate([90,0,90])
+				/*translate([16,-11,0]) rotate([90,0,90])
 					linear_extrude(height = 3, center = true, convexity = 0, twist = 0)  
 					polygon(points=[[0,0],[23,nemaHight-12],[23,nemaHight-2],[0,10]], paths=[[0,1,2,3]]);
 				translate([-11,15,0]) rotate([90,0,0])
 					linear_extrude(height = 3, center = true, convexity = 0, twist = 0)  
-					polygon(points=[[0,0],[23,nemaHight-12],[23,nemaHight-2],[0,10]], paths=[[0,1,2,3]]);
+					polygon(points=[[0,0],[23,nemaHight-12],[23,nemaHight-2],[0,10]], paths=[[0,1,2,3]]);*/
 				for (i = mat) 
 				{
 					translate([i[0]*NEMA17HolesSpacing/2,i[1]*NEMA17HolesSpacing/2,0]) {
 						difference()
 						{
-							cylinder(d=13,h=nemaHight, $fn=6);
+							rotate([0,0,45]) cylinder(d=12.5,h=nemaHight, $fn=6);
 							M3Hole(l=nemaHight+1);
 						}
 					}
@@ -1033,10 +1040,10 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 		}
 
 		translate([0,posNema,-1]) rotate([0,0,45]) {
-			cylinder(d=22, h=thick+2);
+			cylinder(r=11.4, h=thick+2);
 			for (i = mat) 
 			{
-				translate([i[0]*NEMA17HolesSpacing/2,i[1]*NEMA17HolesSpacing/2,0]) cylinder(d=6.5, h=nemaHight-thick+3);
+				translate([i[0]*NEMA17HolesSpacing/2,i[1]*NEMA17HolesSpacing/2,0]) cylinder(d=6.2, h=nemaHight-thick+3);
 			}
 		}		
 		for(i=[-1, 1]) 
@@ -1055,7 +1062,7 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 	}
 }
 	
-module BeltHolderXAxis(h=4.5)
+module BeltHolder(h=4.5)
 {
 	 difference() {
 		translate([-25/2,0,0])	cube([25,75,h]);
@@ -1075,7 +1082,7 @@ module BeltHolderXAxis(h=4.5)
 
 
 
-module BeltHolderYAxis(h=4.5)
+module JoiningPlate(h=4.5)
 {
 	module Endstop(endstop)
 	{
@@ -1124,7 +1131,7 @@ module BeltHolderYAxis(h=4.5)
 				translate([j,-i,h]) drawScrew("M5x10");
 			}
 		}
-		translate([0, 0, 4]) BeltHolderXAxis();
+		translate([0, 0, 4]) BeltHolder();
 	}
 }
 
@@ -1171,10 +1178,10 @@ module ZAxisMountView(t=0.9)
 		translate([0,0,0]) rotate([90, 0, 0]) {
 			vslot20x40(190, vslot_color);
 			for(j=[-1,1]) {
-				translate([j*10,0,-9]) rotate([180,0,0])  drawScrew("M5x20");
+				translate([j*10,0,-8]) rotate([180,0,0])  drawScrew("M5x20");
 			}
 		}
-		rotate([0,180,0]) rotate([-90,180,0]) 	ZAxisPlateMotorHolder();
+		translate([0,0,0]) rotate([0,180,0]) rotate([-90,180,0]) 	ZAxisPlateMotorHolder();
 	}
 }
 	

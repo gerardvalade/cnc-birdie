@@ -51,8 +51,8 @@ module platesZAxis_test()
 	translate([0,0,0]) ZAxisPlateMotorHolder();	
 	translate([0,140,0]) rotate([0,0,90])  AntiBacklash();
 	translate([0,80,0])  XAxisEndstopHolder();
-	translate([100,50,0]) BeltHolderXAxis();
-	translate([100,0,0]) BeltHolderYAxis();
+	translate([90,50,0]) BeltHolder();
+	translate([150,90,0]) JoiningPlate();
 	//translate([80,0,0]) ZAxisMountView(withWheel=withWheel);
 }
 

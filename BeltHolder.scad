@@ -21,6 +21,6 @@ exploded=0;
 cutView=0;
 showExtra=0;
 
-translate([-25,0,0]) BeltHolderXAxis();
-translate([25,0,0]) BeltHolderYAxis();
+translate([-25,0,0]) BeltHolder();
+translate([25,0,0]) JoiningPlate();
 
