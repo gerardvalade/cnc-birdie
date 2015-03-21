@@ -1040,7 +1040,7 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 		}
 
 		translate([0,posNema,-1]) rotate([0,0,45]) {
-			cylinder(r=11.4, h=thick+2);
+			cylinder(r=12.4, h=thick+2);
 			for (i = mat) 
 			{
 				translate([i[0]*NEMA17HolesSpacing/2,i[1]*NEMA17HolesSpacing/2,0]) cylinder(d=6.2, h=nemaHight-thick+3);
