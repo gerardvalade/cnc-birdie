@@ -16,9 +16,9 @@
 
 include <scad/PlateAxis.scad>
 
-showExtra=1;
-showModule=1;
-cutView=1;
+showExtra=0;
+showModule=0;
+cutView=0;
 exploded=0;
 
 $fn=30;

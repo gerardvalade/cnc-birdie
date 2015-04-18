@@ -1,4 +1,4 @@
-// Birdie CNC - Antibacklash - a OpenSCAD 
+// Birdie CNC - endstop holder - a OpenSCAD 
 // Copyright (C) 2015  Gerard Valade
 
 // This program is free software: you can redistribute it and/or modify
@@ -14,13 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-include <scad/PlateAxis.scad>
+include <scad/PlateUtils.scad>
 
 $fn=30;
-exploded=0;
-cutView=0;
-showExtra=0;
 
-//rotate([-90,0,0]) 
-AntiBacklash();
-
+ XAxisEndstopHolder(); 

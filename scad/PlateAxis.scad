@@ -56,7 +56,8 @@ VSlotSpacingAdjustThickness=12;
 // Spacing of wheels for 20x40 V slot rail
 // Not tested, must be adjust for 3D print
 // 59.55~59.70
-VSlotWheelSpacing20x40=59.60; 
+//VSlotWheelSpacing20x40=59.60; 
+VSlotWheelSpacing20x40=59.10; 
 
 
 Hole_Plate=PlateThickness+4;
@@ -68,11 +69,13 @@ color_module_anitbacklash 		= "Lime";// [0.07, 0.87, 0.03];
 color_module_anitbacklash_cover = "OliveDrab"; //[0.77, 0.87, 0.03];
 color_module_nema_holder 		= "Aquamarine"; //[0.9,0.4,0.2];
 color_cut_view 					= "red";
-
+color_extractor					= "yellow";
+color_brim 						= "pink";
 module color_nema_holder() {color("black");}
 
 VSlotSpacingAdjustPartType = 1;
-VSlotWheelMount_y=11+VSlotWheelSpacing20x40/2;
+//VSlotWheelMount_refY=70.60;
+VSlotWheelMount_refY=69.00;
 showExtra=0;
 showModule=0;
 addBrims=1;
@@ -129,71 +132,85 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}	
 	}
 
-	module drawExtractor(xaxis=0, yaxis=0, h=1.5, y=VSlotWheelSpacing20x40)
+	module drawExtractor(large=5, long=8, h=0.6, yy=VSlotWheelSpacing20x40)
 	{
-			for (i = [-1,1]) 
+		
+		module YaxisExtractor(pty)
+		{
+			for (i = [-1, 1]) for (y = pty) 
 			{
-				assign(wp=i*5,hp=5) {
-					render() translate([plate_width(type)/2+wp+i*50.05,y+0,-0.02]) 
+				wp = i*large;
+				hp = long;
+				render() translate([plate_width(type)/2+wp+i*50.05,y,-0.02]) 
 						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
-				}
 			}						
-			for (i = [0,1]) 
+		}
+		module XaxisExtractor(cte, ptx)
+		{
+			for (i = cte) for (x = ptx) 
 			{
-				assign(wp=5,hp=5) {
-					render() translate([plate_width(type)/2-wp/2,(plate_height(type)-(hp-0.1))*i-0.05,-0.02]) 
+				wp = long;
+				hp = large;
+				render() translate([plate_width(type)/2-wp/2+x,(plate_height(type)-(hp-0.1))*i-0.05,-0.02])  
 						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
-				}
-			}
+			}						
+		}
+		
+		
+		color(color_extractor) {
+			if (ModuleTypeXAxis(type)) YaxisExtractor([5, 29, 110]);
+			if (ModuleTypeYAxis(type)) YaxisExtractor([5, 29, 100, 160]);
+			
+			XaxisExtractor([0], [-25, 25]);
+			if (ModuleTypeXAxis(type)) XaxisExtractor([1], [-25, 25]);
+			if (ModuleTypeYAxis(type)) XaxisExtractor([1], [-45, 2]);
+		}
 	}
 
-	module drawBrims(xaxis=0, yaxis=0, brimHeight=0.2)
+	module drawBrims(brimHeight=0.2)
 	{
+		color(color_brim) {
+			if (ModuleTypeYAxis(type)) {
+				assign(wp=55,hp=55, ww=10) {
+				translate([plate_width(type)/2-wp+(wp+9),plate_height(type)-hp-5,0]) 
+						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0) {
+						//polygon(points=[[wp-ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-ww,hp+ww],[-ww,hp],[0,hp],[wp-ww,ww]]);
+						polygon(points=[[wp-ww,-ww],[wp,-ww],[wp,ww+2],[7,hp+5],[-5,hp+5],[wp-ww,ww]]);
+					}
+				}
+				assign(wp=-15,hp=15, ww=10) {
+				translate([plate_width(type)/2+wp-34,plate_height(type)-hp-5,0]) 
+						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0) {
+						//polygon(points=[[wp+ww,0],[wp,0],[wp,hp+ww],[ww,hp+ww],[ww,hp],[wp+ww,hp]]);
+						polygon(points=[[wp+ww,0],[wp,0],[wp,hp+5],[wp+ww,hp+5]]);
+					}
+				}
+			}
 			for (i = [-1,1]) 
 			{
-//				if (xaxis) {
-//					assign(wp=i*30,hp=30, ww=10) {
-//					#translate([plate_width(type)/2+wp+i*5,plate_height(type)-hp-1,0]) 
-//							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-//							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
-//					}
-//				}
-//				if (yaxis && i==1) {
-//					assign(wp=i*55,hp=55, ww=10) {
-//					#translate([plate_width(type)/2-wp+i*(wp+9),plate_height(type)-hp-5,0]) 
-//							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-							//polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
-//					}
-//				}
-//				if (yaxis && i==-1) {
-//					assign(wp=i*15,hp=15, ww=10) {
-//					#translate([plate_width(type)/2+wp+i*34,plate_height(type)-hp-5,0]) 
-//							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-//							//polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
-//						polygon(points=[[wp-i*ww,0],[wp,0],[wp,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[wp-i*ww,hp]]);
-//					}
-//				}
-//				assign(wp=i*30,hp=40, ww=10) {
-//					#translate([plate_width(type)/2+wp+i*5,-5,0]) 
-//						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-//						polygon(points=[[0,0],[wp,0],[wp,hp],[wp-i*ww,hp],[wp-i*ww,ww],[0,ww]]);
-//				}
-				assign(wp=i*10,hp=35) {
-					translate([plate_width(type)/2+wp+i*48,-0,0]) 
+				if (ModuleTypeXAxis(type)) {
+					assign(wp=i*30,hp=30, ww=10) {
+					translate([plate_width(type)/2+wp+i*5,plate_height(type)-hp-1,0]) 
+							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
+							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
+					}
+				}
+				assign(wp=i*9,hp=40) {
+					translate([plate_width(type)/2+wp+i*49,-0,0]) 
 						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
 				}
 			}
-		
+		}
 	}
 	
 
-	module frameYAxisPlate(VSlotWheelMount_y)
+	module frameYAxisPlate()
 	{
 		if (addBrims) {
-			drawBrims(yaxis=1);
+			drawBrims();
 		}
 		difference() 
 		{
@@ -238,7 +255,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 				}
 			} // end union
 
-			translate([plate_width(type)/2,VSlotWheelMount_y]) 
+			translate([plate_width(type)/2,VSlotWheelMount_refY]) 
 				VSlotWheelAndNemaMotor(width=plate_width(type)-15, withNemaMotor=true);
 			
 		
@@ -246,10 +263,10 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			
 			translate([0,0,0]) XAxisEndstop(0);
 		
-			drawExtractor(yaxis=1);
+			drawExtractor();
 		
 			// Plate Spring part
-			if(VSlotSpacingAdjustPartType==1)
+			if(VSlotSpacingAdjustPartType==1||VSlotSpacingAdjustPartType==3)
 			{
 				VSlotSpacingAdjustPartHole();
 			}
@@ -268,7 +285,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			
 		
 		
-		mountWheel(VSlotWheelMount_y, withNemaMotor=true);
+		mountWheel(withNemaMotor=true);
 		translate([0,0,0]) XAxisEndstop(1);
 		if(VSlotSpacingAdjustPartType==1)
 		{
@@ -316,10 +333,10 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}		
 	}
 
-	module frameXAxisPlate(VSlotWheelMount_y, withNemaMotor)
+	module frameXAxisPlate(withNemaMotor)
 	{
 		if (addBrims) {
-			drawBrims(xaxis=1);
+			drawBrims();
 		}
 			   				
 		difference() 
@@ -367,7 +384,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			} // end union
 
 	
-			translate([plate_width(type)/2,VSlotWheelMount_y]) 
+			translate([plate_width(type)/2,VSlotWheelMount_refY]) 
 				VSlotWheelAndNemaMotor(width=plate_width(type)-15, withNemaMotor=withNemaMotor);
 			
 //			if(ModuleTypeXAxisFront(type))
@@ -377,7 +394,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			
 			addSpacer(wheel=0);
 
-			drawExtractor(xaxis=1);
+			drawExtractor();
 
 			// Plate Spring part
 			if(VSlotSpacingAdjustPartType==1)
@@ -396,24 +413,24 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 
 	}
 
-	module frameXAxisBackPlate(VSlotWheelMount_y)
+	module frameXAxisBackPlate()
 	{
-		frameXAxisPlate(VSlotWheelMount_y=VSlotWheelMount_y, withNemaMotor=true);
+		frameXAxisPlate(withNemaMotor=true);
 
-		mountWheel(VSlotWheelMount_y, withNemaMotor=true);
+		mountWheel(withNemaMotor=true);
 		//addSpacer(wheel=1, h=0);
 
 	}
 
 
-	module mountWheel(VSlotWheelMount_y, withNemaMotor)
+	module mountWheel(withNemaMotor)
 	{
-		translate([plate_width(type)/2,VSlotWheelMount_y]) 
+		translate([plate_width(type)/2,VSlotWheelMount_refY]) 
 			VSlotWheelAndNemaMotor(width=plate_width(type)-15, withNemaMotor=withNemaMotor, wheel=1, h=PlateThickness);
 
 	}
 
-	module frameXAxisFrontPlate(VSlotWheelMount_y, w1=plate_height(type)-15,y1=5)
+	module frameXAxisFrontPlate(w1=plate_height(type)-15,y1=5)
 	{
 
 		module trunck()
@@ -450,7 +467,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		difference() 
 		{
 			
-			frameXAxisPlate(VSlotWheelMount_y=VSlotWheelMount_y, withNemaMotor=false);
+			frameXAxisPlate(withNemaMotor=false);
 			// Top X/Z axis mounting 
 
 			translate([plate_width(type)/2,y1,0]) {
@@ -472,7 +489,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	
 		} // end difference
 
-		mountWheel(VSlotWheelMount_y, withNemaMotor=false);
+		mountWheel(withNemaMotor=false);
 		addSpacer(wheel=1, h=61);
 
 		if (showModule)
@@ -641,7 +658,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	module VSlotWheelAndNemaMotor(width=0, withNemaMotor=false, wheel=0, h=PlateThickness)
 	{
 		if (VSlotSpacingAdjustPartType==2 && !wheel) {
-			translate([0,-VSlotWheelSpacing20x40/2,-0.02]) 
+			translate([0,-VSlotWheelSpacing20x40,-0.02]) 
 				translate([0,0,-1])	M5Hole(l=h+4);
 		} 
 		for (i = [-1,1]) 
@@ -653,7 +670,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			}
 			else 
 			{
-				translate([i*(width/2),VSlotWheelSpacing20x40/2,0]) {
+				translate([i*(width/2),0,0]) {
 					translate([0,0,-0.02]) VWheelHole(h=Hole_Plate, wheel=wheel, h=h);
 					if(wheel==0) {
 						if (cutView) color(color_cut_view)  {
@@ -663,10 +680,12 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 							// Cut view adjust wheel
 							translate([i*12,-40,8])
 			   					cube([20,65,PlateThickness+15], center=true);
+							translate([i*5,-70,8])
+			   					cube([20,20,PlateThickness+15], center=true);
 						}
 					}
 				}
-				translate([i*(width/2-5),-VSlotWheelSpacing20x40/2,0]) {
+				translate([i*(width/2-6),-VSlotWheelSpacing20x40,0]) {
 					translate([0,0,-0.02]) VWheelHole(h=Hole_Plate, wheel=wheel, h=h);
 				}
 			}
@@ -678,13 +697,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					if (!wheel) {
 						hull()
 						{
-							translate([i*ww,VSlotWheelSpacing20x40/2,-0.02]) 
+							translate([i*ww,0,-0.02]) 
 								BeltBearingHole(h=Hole_Plate, wheel=0);
-							translate([i*ww,VSlotWheelSpacing20x40/2+21,-0.02]) 
+							translate([i*ww,21,-0.02]) 
 								BeltBearingHole(h=Hole_Plate, wheel=0);
 						}
 					} else {
-						translate([i*ww,VSlotWheelSpacing20x40/2+21,-0.02]) 
+						translate([i*ww,21,-0.02]) 
 							BeltBearingHole(h=Hole_Plate, wheel=wheel);
 					}
 				}
@@ -697,13 +716,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					
 					if (ModuleTypeXAxisBack(type))
 					{
-						translate([0,VSlotWheelSpacing20x40/2+NEMA23HolesSpacing/2+19,PlateThickness+1]) 
+						translate([0,NEMA23HolesSpacing/2+19,PlateThickness+1]) 
 								rotate([0,180,0]) NemaHolder(depth=Hole_Plate, showMotor=wheel, rot=45);
 						
 					} 
 					else 
 					{
-						translate([0,VSlotWheelSpacing20x40/2+NEMA23HolesSpacing/2+19,PlateThickness]) 
+						translate([0,NEMA23HolesSpacing/2+19,PlateThickness]) 
 								rotate([0,180,0]) NemaHolder(depth=Hole_Plate, showMotor=wheel, rot=45);
 					
 					}
@@ -772,14 +791,19 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	
 	module VSlotSpacingAdjustPart(posY=19, posX=plate_width(type)/2, posXScrew=5, posZ=VSlotSpacingAdjustThickness-5)
 	{
+		module bump(i, posX, thick)
+		{
+			translate([posX-6+i*(posX-6),23,0]) cube([12,13,thick]);
+		}
 		for (i = [-1, 1]) 
 		{
-			translate([posX-10+i*(posX-10),0]) cube([20,posY,VSlotSpacingAdjustThickness]);
-			if (ModuleTypeXAxisFront(type)) 
-				translate([posX-5+i*(posX-5),23,0]) cube([10,13,VSlotSpacingAdjustThickness]);
+			translate([posX-11+i*(posX-11),0]) cube([22,posY,VSlotSpacingAdjustThickness]);
+			if (ModuleTypeXAxisFront(type))
+				bump(i, posX, VSlotSpacingAdjustThickness);
 			else
-				translate([posX-5+i*(posX-5),23,0]) cube([10,13,VSlotSpacingAdjustThickness+6]);
-			translate([posX-7.49+i*(posX-7.52),VSlotWheelSpacing20x40+3.5,0]) cube([15,15,VSlotSpacingAdjustThickness]);
+				bump(i, posX, VSlotSpacingAdjustThickness+6);
+
+			translate([posX-7.49+i*(posX-7.52),VSlotWheelMount_refY-7.5,0]) cube([15,15,VSlotSpacingAdjustThickness]);
 
 		}
 	}
@@ -798,29 +822,43 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 
 	module VSlotSpacingAdjustPartHole(posX=plate_width(type)/2, 
 			posY=21, 
-			posXScrew=5, 
-			posZ=VSlotSpacingAdjustThickness-5)
+			posXScrew=6, 
+			posZ=VSlotSpacingAdjustThickness-6)
 	{
 		for (i = [-1, 1]) 
 		{
 			translate([posX+i*(posX-15)-0,posY,VSlotSpacingAdjustThickness/2]) 
-	   			cube([45,4,VSlotSpacingAdjustThickness+2], center=true);
-			translate([posX+i*(posX-35),posY,-1])  
+	   			cube([35,4,VSlotSpacingAdjustThickness+2], center=true);
+			translate([posX+i*(posX-30),posY,-1])  
 				cylinder(d=8,h=PlateThickness+4);
 			
-			if (!ModuleTypeXAxisFront(type)) 
-				translate([posX+i*(posX+1),posY+9,posZ+6])
-					rotate([0,90,(i+1)*90]) { 
-						M3Hole(l=12);
-						M3Hexa(l=6);
-					}
-
-			if (posXScrew>0) {
+			if (!ModuleTypeXAxisFront(type)) {
+				if (VSlotSpacingAdjustPartType==3) {
+					translate([posX+i*(posX-20),posY+9,0])
+						rotate([0,0,(i+1)*90]) { 
+							M3Hole(l=12);
+						}
+					translate([posX+i*(posX-5),posY+9,0])
+						rotate([0,0,(i+1)*90]) { 
+							M3Hole(l=12);
+						}
+				}
+				if (VSlotSpacingAdjustPartType==1) {
+					// endstop screw hole 
+					translate([posX+i*(posX+1),posY+9,VSlotSpacingAdjustThickness+1])
+						rotate([0,90,(i+1)*90]) { 
+							M3Hole(l=15);
+							M3Hexa(l=6);
+						}
+				}
+			}
+			if (VSlotSpacingAdjustPartType==1&&posXScrew>0) {
+				// Adjust hole screw
 				translate([posX+i*(posX-posXScrew),-0.02,posZ])
 				{
 					rotate([90,90,0]) {
 						translate([0,0,-42]) M3Hexa(l=12);
-						drawM3HoleThrought(l=25, h=14, hcld=1);
+						drawM3HoleThrought(l=25, h=14);
 					}
 					
 				}
@@ -828,23 +866,23 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}
 	}
 
-	module VSlotSpacingAdjustPart2(posY=19, posX=plate_width(type)/2, posXScrew=5, posZ=VSlotSpacingAdjustThickness-5)
+	module VSlotSpacingAdjustPart2(posY=19, posX=plate_width(type)/2, posXScrew=6, posZ=VSlotSpacingAdjustThickness-6)
 	{
 		if (showExtra)
-		for (i = [-1, 1]) 
-		{
-			
-			translate([posX+i*(posX-posXScrew),-0.02,posZ])
+			for (i = [-1, 1]) 
 			{
-				rotate([90,90,0]) {
-					
-					translate([0,0,-14])  {
-						drawBolt("M3x20", 16);
+				
+				translate([posX+i*(posX-posXScrew),-0.02,posZ])
+				{
+					rotate([90,90,0]) {
+						
+						translate([0,0,-14])  {
+							drawBolt("M3x20", 16);
+						}
 					}
 				}
+				
 			}
-			
-		}
 		
 	}
 
@@ -861,7 +899,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 		if (!wheel) {
 			translate([0,0,-1])	M5Hole(l=h+4);
-			if (ModuleTypeYAxis(type)) translate([0,0,PlateThickness+1]) M5RHexa(l=PlateThickness+0);
+			if (ModuleTypeYAxis(type)) translate([0,0,PlateThickness+0]) M5RHexa(l=PlateThickness+0);
 			if (ModuleTypeXAxisBack(type)) translate([0,0,PlateThickness-1]) M5RHexa(l=PlateThickness+0);
 			if (ModuleTypeXAxisFront(type)) translate([0,0,VSlotSpacingAdjustThickness+0.04]) drawM5HoleThrought(l=VSlotSpacingAdjustThickness,h=(VSlotSpacingAdjustThickness-PlateThickness)+1.04);
 		} 
@@ -889,19 +927,19 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 		translate([plate_width(type),0,0]) 
 			mirror([1,0,0]) 
-			frameYAxisPlate(VSlotWheelMount_y);
+			frameYAxisPlate();
 	}
 	else if (ModuleTypeYAxisLeft(type))
 	{
-		frameYAxisPlate(VSlotWheelMount_y);
+		frameYAxisPlate();
 	}
 	else if (ModuleTypeXAxisFront(type))
 	{
-		frameXAxisFrontPlate(VSlotWheelMount_y);
+		frameXAxisFrontPlate();
 	}
 	else if (ModuleTypeXAxisBack(type))
 	{
-		frameXAxisBackPlate(VSlotWheelMount_y);
+		frameXAxisBackPlate();
 	}
 	else if (ModuleSpacerLeft(type))
 	{

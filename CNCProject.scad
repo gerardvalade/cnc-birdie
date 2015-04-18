@@ -49,8 +49,7 @@ module CNC()
 			translate([-250, length/2+ length/2*i-i*10, 0]) rotate([90, 90, 90]) vslot20x40(500, vslot_color);
 		}
 
-		translate([0,length-80-$t*(length-160), 40-VSlotWheelMount_y]) YAxis();
-
+		translate([0,length-80-$t*(length-160), 70-VSlotWheelMount_refY]) YAxis();
 	}
 	
 	module YAxis()
@@ -67,15 +66,11 @@ module CNC()
 	{
 		for(i=[-1,1]) {
 			// X axis rail
-			translate([-250, i*15, 0]) rotate([90, 90, 90]) {
+			translate([-250, i*15, VSlotWheelMount_refY-70]) rotate([90, 90, 90]) {
 				vslot20x40(500, vslot_color);
 				for(j=[-1,1]) {
-//					if (i == 1)
-//						#translate([j*10,0,-17]) rotate([180,0,0])  drawScrew("M5x20");
 					if (i == -1)
 						translate([j*10,0,-8]) rotate([180,0,0])  drawScrew("M5x20");
-//					if (i == 1)
-//						translate([j*10,0,517]) rotate([0,0,0])  drawScrew("M5x20");
 					if (i == -1)
 						translate([j*10,0,508]) rotate([0,0,0])  drawScrew("M5x20");
 				}

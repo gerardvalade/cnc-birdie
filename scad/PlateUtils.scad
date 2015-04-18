@@ -223,7 +223,7 @@ module wheel10(h) {
 		translate([0, 0, 15]) solidWheel();
 	}
 	translate([0, 0, 20]) {
-		drawBolt("M5x35", 29);
+		drawBolt("M5x35", 28);
 	}
 }
 
