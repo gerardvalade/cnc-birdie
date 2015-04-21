@@ -16,3 +16,7 @@ Correct some spacing too small for printing.<br/>
 Adding Y reference position to the upper of the wheel.<br/>
 Adding partial brim.<br/>
 Generate stl file.<br/>
+
+2015-04-21<br/>
+Adding parameter :
+VSlotWheelSpacing20x40_X, VSlotWheelSpacing20x40_Y, VSlotWheelSpacing20x40_Z

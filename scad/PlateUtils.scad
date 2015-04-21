@@ -146,7 +146,7 @@ module drawBoltLowProfile(name, posNut=10)
 {
 	famkey = _get_famkey(name);
 	stainless() {
-		#translate([0,0,exploded? _get_length(name) * exploded * 1.5 : 0]) screw(name);
+		translate([0,0,exploded? _get_length(name) * exploded * 1.5 : 0]) screw(name);
 		translate([0,0,-posNut-exploded*10]) nut(famkey);
 	}
 }

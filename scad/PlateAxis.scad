@@ -56,8 +56,10 @@ VSlotSpacingAdjustThickness=12;
 // Spacing of wheels for 20x40 V slot rail
 // Not tested, must be adjust for 3D print
 // 59.55~59.70
-//VSlotWheelSpacing20x40=59.60; 
-VSlotWheelSpacing20x40=59.10; 
+//VSlotWheelSpacing20x40_Y=59.60; 
+VSlotWheelSpacing20x40_X=59.70; 
+VSlotWheelSpacing20x40_Y=59.10; 
+VSlotWheelSpacing20x40_Z=59.10; 
 
 
 Hole_Plate=PlateThickness+4;
@@ -132,7 +134,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}	
 	}
 
-	module drawExtractor(large=5, long=8, h=0.6, yy=VSlotWheelSpacing20x40)
+	module drawExtractor(large=5, long=8, h=0.6)
 	{
 		
 		module YaxisExtractor(pty)
@@ -448,14 +450,14 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}
 
 		color(color_module_plate2) translate([plate_width(type)/2,y1,0]) {
-			translate([-VSlotWheelSpacing20x40/2, 0, 0]) {
+			translate([-VSlotWheelSpacing20x40_Z/2, 0, 0]) {
 				difference() 
 				{
 					ZPlateSpacerFrame(w1, leftSide=1, h=ZSpacerSocle, xaxis=2, wheel=0);
 					translate([-15, 0, -1]) trunck();
 				}
 			}
-			translate([VSlotWheelSpacing20x40/2, 0, 0]) {
+			translate([VSlotWheelSpacing20x40_Z/2, 0, 0]) {
 				difference() 
 				{
 					ZPlateSpacerFrame(w1, leftSide=0, h=ZSpacerSocle, xaxis=2, wheel=0);
@@ -471,8 +473,8 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			// Top X/Z axis mounting 
 
 			translate([plate_width(type)/2,y1,0]) {
-				translate([-VSlotWheelSpacing20x40/2,w1/2])  VSlotMountZPlate(width=w1-18, leftSide=1, xaxis=1);
-				translate([VSlotWheelSpacing20x40/2,w1/2])  VSlotMountZPlate(width=w1-18, leftSide=0, xaxis=1);
+				translate([-VSlotWheelSpacing20x40_Z/2,w1/2])  VSlotMountZPlate(width=w1-18, leftSide=1, xaxis=1);
+				translate([VSlotWheelSpacing20x40_Z/2,w1/2])  VSlotMountZPlate(width=w1-18, leftSide=0, xaxis=1);
 			}
 
 			translate([plate_width(type)/2,plate_height(type)/2+10,-0.1]) {
@@ -497,9 +499,9 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			translate([plate_width(type)/2,plate_height(type)/2+10,PlateThickness+1+exploded*20]) rotate([0,0,180]) AntiBacklash();
 
 			translate([plate_width(type)/2,y1,ZSpacerSocle]) {
-				translate([-VSlotWheelSpacing20x40/2, 0, 0]) 
+				translate([-VSlotWheelSpacing20x40_Z/2, 0, 0]) 
 					ZPlateSpacerLeft(wheel=1);
-				translate([VSlotWheelSpacing20x40/2, 0, 0]) 
+				translate([VSlotWheelSpacing20x40_Z/2, 0, 0]) 
 					ZPlateSpacerRight(wheel=1);
 			}
 		}
@@ -646,30 +648,21 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		}
 	}
 
-	module VSlotMountType2(width, n=2, wheel=0, h)
-	{
-		for (i = [1]) 
-			/* V Slot Hole Mounting */
-			for(j = [0 : n]) 
-				translate([-width/2+j*(width/n),i*VSlotWheelSpacing20x40/2,-0.02]) 
-					VWheelHole(h=Hole_Plate+10, wheel=wheel, h=h);
-	}
 	
 	module VSlotWheelAndNemaMotor(width=0, withNemaMotor=false, wheel=0, h=PlateThickness)
 	{
-		if (VSlotSpacingAdjustPartType==2 && !wheel) {
-			translate([0,-VSlotWheelSpacing20x40,-0.02]) 
-				translate([0,0,-1])	M5Hole(l=h+4);
-		} 
-		for (i = [-1,1]) 
+		module VSlotMountType2(width, n=2, wheel=0, h)
 		{
 			/* V Slot Hole Mounting */
-			if(VSlotSpacingAdjustPartType == 2)
-			{
-				VSlotMountType2(width, 1, wheel=wheel, h=h);	
-			}
-			else 
-			{
+			for(j = [0 : n]) 
+				translate([-width/2+j*(width/n),0,-0.02]) 
+					VWheelHole(h=Hole_Plate+10, wheel=wheel, h=h);
+		}
+		
+		module drawWheelHolder(wheelSpacing)
+		{
+			for (i = [-1,1]) 
+			{	
 				translate([i*(width/2),0,0]) {
 					translate([0,0,-0.02]) VWheelHole(h=Hole_Plate, wheel=wheel, h=h);
 					if(wheel==0) {
@@ -685,11 +678,29 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 						}
 					}
 				}
-				translate([i*(width/2-6),-VSlotWheelSpacing20x40,0]) {
+				translate([i*(width/2-6),-wheelSpacing,0]) {
 					translate([0,0,-0.02]) VWheelHole(h=Hole_Plate, wheel=wheel, h=h);
 				}
 			}
+		}
 		
+		if (VSlotSpacingAdjustPartType==2 && !wheel) {
+			translate([0,-VSlotWheelSpacing20x40_Y,-0.02]) 
+				translate([0,0,-1])	M5Hole(l=h+4);
+		} 
+		/* V Slot Hole Mounting */
+		if(VSlotSpacingAdjustPartType == 2)
+		{
+			VSlotMountType2(width, 1, wheel=wheel, h=h);	
+		}
+		else 
+		{
+			if (ModuleTypeXAxis(type)) drawWheelHolder(VSlotWheelSpacing20x40_X);
+			if (ModuleTypeYAxis(type)) drawWheelHolder(VSlotWheelSpacing20x40_Y);
+		}
+		
+		for (i = [-1,1]) 
+		{
 			if (withNemaMotor)
 			{
 				
