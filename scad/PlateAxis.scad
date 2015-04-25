@@ -166,7 +166,8 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			if (ModuleTypeYAxis(type)) YaxisExtractor([5, 29, 100, 160]);
 			
 			XaxisExtractor([0], [-25, 25]);
-			if (ModuleTypeXAxis(type)) XaxisExtractor([1], [-25, 25]);
+			
+			if (ModuleTypeXAxis(type)) XaxisExtractor([1], [-21, 21]);
 			if (ModuleTypeYAxis(type)) XaxisExtractor([1], [-45, 2]);
 		}
 	}
@@ -211,6 +212,21 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 
 	module frameYAxisPlate()
 	{
+		module XAxisEndstop(endstop)
+		{
+			if (endstop==1 && showModule) {
+				translate([2,plate_height(type)-65,3+exploded*15]) rotate([-90,0,90]) endstop();
+				translate([10,plate_height(type)-27,PlateThickness+exploded*25]) rotate([90,0,0])  XAxisEndstopHolder();
+	
+			} else if (endstop==0) {
+				translate([0,plate_height(type)-48,-0.5])   
+				{
+					XAxisEndstopHole(h=PlateThickness+2);
+				}
+			}
+		}
+	
+		
 		if (addBrims) {
 			drawBrims();
 		}
@@ -288,7 +304,10 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		
 		
 		mountWheel(withNemaMotor=true);
-		translate([0,0,0]) XAxisEndstop(1);
+		
+		if (ModuleTypeYAxisLeft(type))
+			translate([0,0,0]) XAxisEndstop(1);
+		
 		if(VSlotSpacingAdjustPartType==1)
 		{
 			VSlotSpacingAdjustPart2();
@@ -444,9 +463,23 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			}
 		}	
 		
-		module addEndStop(endstop)
+		module ZAxisEndstop(endstop)
 		{
-			translate([plate_width(type)/2 ,plate_height(type)-4, 0]) ZAxisEndstop(endstop);
+			translate([plate_width(type)/2 ,plate_height(type)-4, 0]) {
+				if (endstop) {
+					//translate([23.7,0,-exploded*20]) rotate([0,180,0]) endstop();
+					translate([5,0,-exploded*20]) rotate([0,180,0]) endstop();
+					//translate([42.5,-0,-exploded*20]) rotate([0,180,0]) endstop();
+				} 
+				for (i = [28,  9.5, -9.5, -28]) 
+				{
+					//if (endstop) translate([i,-0,-2-exploded*15]) rotate([0,180,0]) drawBolt("M2.5x16");
+					if (endstop==0) {
+						translate([i,0,-1]) rotate([0,0,0]) M2_5Thread();
+						//translate([i,-2,0]) rotate([0,0,0]) ToolMountingOne(w=5, hole="M2.5");
+					}
+				}
+			}
 		}
 
 		color(color_module_plate2) translate([plate_width(type)/2,y1,0]) {
@@ -487,7 +520,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					}
 				}
 			}
-			addEndStop(0);
+			ZAxisEndstop(0);
 	
 		} // end difference
 
@@ -504,8 +537,8 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 				translate([VSlotWheelSpacing20x40_Z/2, 0, 0]) 
 					ZPlateSpacerRight(wheel=1);
 			}
+			ZAxisEndstop(1);
 		}
-		addEndStop(1);
 		
 	}
 
@@ -749,38 +782,6 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	
 	}
 
-	module ZAxisEndstop(endstop)
-	{
-		if (endstop && showModule) {
-			translate([23.7,0,-exploded*20]) rotate([0,180,0]) endstop();
-		} 
-		if (endstop==0) {
-			for (i = [-1, 1]) 
-			{
-				translate([i*9.5,-2,0]) rotate([0,0,0]) ToolMountingOne(w=5, hole="M2.5");
-			}
-		}
-	}
-
-	module XAxisEndstop(endstop)
-	{
-		if (endstop==1 && showModule) {
-			translate([2,plate_height(type)-65,3+exploded*15]) rotate([-90,0,90]) endstop();
-			translate([10,plate_height(type)-27,PlateThickness+exploded*25]) rotate([90,0,0])  XAxisEndstopHolder();
-
-		} else if (endstop==0) {
-			translate([7,plate_height(type)-48,-0.5])   
-			{
-				for (i = [-1, 1]) 
-				{
-					translate([3,i*9.5,0])  rotate([0,0,0]) M3Hole(l=PlateThickness+2);
-				}
-				translate([-19,-21,0])  cube([15,42,PlateThickness+2]);
-			}
-		}
-	}
-	
-	
 	module ToolMounting(width=0, MountingTool_x=8, MountingTool_y=52)
 	{
 		for (i = [-1, 1]) 
@@ -859,7 +860,7 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					translate([posX+i*(posX+1),posY+9,VSlotSpacingAdjustThickness+1])
 						rotate([0,90,(i+1)*90]) { 
 							M3Hole(l=15);
-							M3Hexa(l=6);
+							translate([0,0,0.9]) M3Hexa(l=4);
 						}
 				}
 			}
@@ -1052,21 +1053,31 @@ module AntiBacklash(width=35,height=22,thick=60)
 
 module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=22, mat=[[-1, 1],[1, 1],[1,-1],[-1,-1]])
 {
+	module endStop(bolt=false)
+	{
+			translate([-25,48,thick/2]) {
+				if (!bolt)
+				difference() {
+					rotate([0,0,45]) translate([0,-2,0]) cube([12,15,thick], center=true);
+					translate([0,0,-5]) M3Hole(l=10);
+					translate([0,0,-11.5]) M3Hexa();
+				}
+				if (bolt)
+				 translate([0,0,10]) drawBolt("M3x16", 11.5);
+			}
+	}
 
 	difference() 
 	{	
 		color(color_module_nema_holder) union() {
 			
 			translate([0,28,thick/2]) { 
-				difference()
-				{
-					assign(wp=width/2,hp=height/2,hp2=25) {
-						linear_extrude(height = thick, center = true, convexity = 0, twist = 0)
-						polygon(points=[[-wp,-hp],[wp,-hp],[wp,0],[10,hp2],[-10,hp2],[-wp,0]], paths=[[0,1,2,3,4,5]]);
-					}
+				assign(wp=width/2,hp=height/2,hp2=25) {
+					linear_extrude(height = thick, center = true, convexity = 0, twist = 0)
+					polygon(points=[[-wp,-hp],[wp,-hp],[wp,0],[10,hp2],[-10,hp2],[-wp,0]], paths=[[0,1,2,3,4,5]]);
 				}
 			}
-			
+			endStop(false);
 			translate([0,posNema,thick])  rotate([0,0,45]) {
 				/*translate([16,-11,0]) rotate([90,0,90])
 					linear_extrude(height = 3, center = true, convexity = 0, twist = 0)  
@@ -1108,13 +1119,20 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 	}
 	if (showExtra) {
 		translate([0,posNema,thick+nemaHight]) rotate([180,0,0]) NemaHolder(depth=0, showMotor=205, rot=45, mat=[[-1, 1],[-1, -1],[1,-1]]);
+		endStop(true);
 	}
 }
 	
-module BeltHolder(h=4.5)
+module BeltHolder(h=40.5)
 {
+
+	tensionL=25;
+	tensionW=16;
+	tensionH=4.5;
+
+	translate([0, 0, tensionH])  rotate([0,180,0]) { 
 	 difference() {
-		translate([-25/2,0,0])	cube([25,75,h]);
+		translate([-25/2,0,0])	cube([25,75,tensionH]);
 		for(i=[10, 30]) { 
 			translate([0,i,-20.2]) M5Hole(l=41);
 		}
@@ -1124,29 +1142,87 @@ module BeltHolder(h=4.5)
 	}
 	if (showExtra) {
 		for(i=[10, 30]) { 
-			translate([0,i, h]) drawScrew("M5x20");
+			translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x16");
+		}
+	}
+	}
+}
+
+module BeltTensioner(h=40.5)
+{
+	tensionL=25;
+	tensionW=16;
+	tensionH=4.5;
+
+	tensionY=51.5;
+
+	translate([0, 0, tensionH])  rotate([0,180,0]) {
+		 difference() {
+			union() {
+				translate([-tensionL/2,0,0]) cube([tensionL,75,tensionH]);
+				translate([-tensionL/2,tensionY-tensionW/2,-3.9]) cube([tensionL,tensionW,3.9]); //cylinder(d=16, h=5);
+			}
+			for(i=[10, 30]) { 
+				translate([0,i,-20.2]) M5Hole(l=41);
+			}
+			translate([0,tensionY,0])  {
+				translate([0,0,-20.2]) M5Hole(l=41);
+				translate([0,0,-4]) M5RHexa(l=4);
+			}
+			for(i=[35,41,59.5,66]) { 
+				ww=2.5;
+				translate([-8/2,i,-0.1]) cube([8,ww,tensionH+1]);
+			}
+		}
+		if (showExtra) {
+			for(i=[10, 30]) { 
+				translate([0,i, 0]) 
+					rotate([0,180,0]) drawScrew("M5x25");
+				translate([0,i,tensionH+5]) rotate([0,0,0])  precisionShim10x5x10();
+			}
+			translate([0, tensionY, 10]) rotate([0,0,0]) drawBolt("M5x16", posNut=10.4);
+			translate([0, tensionY, -7-exploded*20]) rotate([180,0,0])  Tensioner();
+		}
+	}
+}
+
+module Tensioner()
+{
+	tensionL=25;
+	tensionW=16;
+	tensionH=3;
+ 
+	translate([0,0,tensionH/2]) {
+		difference() {
+			union() {
+				cube([tensionL,tensionW,tensionH], center=true);
+				translate([0,0,tensionH/2]) {
+					difference() {
+					 	rotate([0,90,0]) cylinder(d=tensionW,h=tensionL,center=true);
+						translate([0,0,-5]) cube([tensionL+1,tensionW+1,10], center=true);
+					}
+				}
+			}
+			translate([0,0,tensionH/2+1.5]) cube([8,30,3.6], center=true);
+			#translate([0,0,-9.8]) rotate([0,0,0]) M5Hole();
 		}
 	}
 }
 
 
 
-module JoiningPlate(h=4.5)
+module JoiningPlate(front, right, h=4.5)
 {
 	module Endstop(endstop)
 	{
 		if (endstop==1 && showModule) {
 			translate([0,0,0]) rotate([-90,0,90]) endstop();
-			translate([8.5,40,3]) rotate([90,0,0])  XAxisEndstopHolder();
+			translate([8.5,40,3]) rotate([90,0,0])  YAxisEndstopHolder();
 
 		} else if (endstop==0) {
-			translate([7,plate_height(type)-48,-0.5])   
+			translate([0,plate_height(type)-48,-0.5])   
 			{
-				for (i = [-1, 1]) 
-				{
-					translate([3,i*9.5,0])  rotate([0,0,0]) M3Hole(l=PlateThickness+2);
-				}
-				translate([-19,-21,0])  cube([15,42,PlateThickness+2]);
+				YAxisEndstopHole(h=PlateThickness+2);
 			}
 		}
 	}
@@ -1173,14 +1249,20 @@ module JoiningPlate(h=4.5)
 		translate([-24.5, -4, 0]) Endstop(0);
 	}
 	if (showExtra) {
-		translate([-23, -23, 0]) Endstop(1);
-		for(i=[10, 30]) { 
-			//translate([0,i, h]) drawScrew("M5x20");
-			for(j=[0,30]) { 
-				translate([j,-i,h]) drawScrew("M5x10");
+		if (front) {
+			if(right) translate([-23, -23, 0]) Endstop(1);
+			for(i=[10, 30]) { 
+				//translate([0,i, h]) drawScrew("M5x20");
+				for(j=[0,30]) { 
+					translate([j,-i,h]) drawScrew("M5x10");
+				}
 			}
+			translate([0, 0, 9])  rotate([0,0,0])  BeltHolder();
 		}
-		translate([0, 0, 4]) BeltHolder();
+		if(!front) {
+			if(!right)	translate([-23, -23, 0]) Endstop(1);
+			translate([0, 0, 14])  rotate([0,0,0])  BeltTensioner();
+		}
 	}
 }
 
@@ -1230,7 +1312,7 @@ module ZAxisMountView(t=0.9)
 				translate([j*10,0,-8]) rotate([180,0,0])  drawScrew("M5x20");
 			}
 		}
-		translate([0,0,0]) rotate([0,180,0]) rotate([-90,180,0]) 	ZAxisPlateMotorHolder();
+		translate([0,0,0]) rotate([0,180,0]) rotate([-90,180,0]) ZAxisPlateMotorHolder();
 	}
 }
 	

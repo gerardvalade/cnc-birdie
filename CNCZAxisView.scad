@@ -1,4 +1,4 @@
-// Birdie CNC - endstop holder - a OpenSCAD 
+// Birdie CNC - Plates - a OpenSCAD 
 // Copyright (C) 2015  Gerard Valade
 
 // This program is free software: you can redistribute it and/or modify
@@ -14,8 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-include <scad/PlateUtils.scad>
+include <scad/PlateAxis.scad>
+use <scad/vslot.scad>
+use <scad/vitamins/stepper-motors.scad>
+
+showExtra=1;
+showModule=1;
+cutView=0;
+exploded=0;
+addBrims=0;
+
 
 $fn=30;
-
- XAxisEndstopHolder(); 
+translate([0,0,0]) ZAxisMountView(withWheel=withWheel);

@@ -18,9 +18,10 @@ include <scad/PlateAxis.scad>
 
 $fn=30;
 exploded=0;
-cutView=0;
 showExtra=0;
+showModule=0;
 
-translate([-25,0,0]) BeltHolder();
-translate([25,0,0]) JoiningPlate();
-
+translate([-25,-70,0]) BeltHolder();
+translate([25,-25,0]) JoiningPlate();
+translate([-25,25,0]) BeltTensioner();
+translate([25,70,0])  Tensioner();

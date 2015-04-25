@@ -38,11 +38,13 @@ module CNC()
 	module bottom(length=500)
 	{
 		color(plate_color) translate([-230,0,20]) cube([460,length, 20]);
-		for(i=[-1,1]) {
+		for(i=[-1, 1]) {
 			// Y axis rail
 			translate([i*235, 0, 40]) rotate([0, 90, 90]) {vslot20x40(length, vslot_color);
-				translate([20,0,0])  rotate([0,180,90]) mirror([i+1,0,0]) JoiningPlate(); 
-				translate([20,0,500])  rotate([0,0,90]) mirror([i-1,0,0]) JoiningPlate(); 
+				// front
+				translate([20,0,0])  rotate([0,180,90]) mirror([i+1,0,0]) JoiningPlate(front=true,right=(i==-1));
+				// back 
+				translate([20,0,500])  rotate([0,0,90]) mirror([i-1,0,0]) JoiningPlate(front=false,right=(i==-1)); 
 			}
 			
 			// Bottom rail	
@@ -75,8 +77,8 @@ module CNC()
 						translate([j*10,0,508]) rotate([0,0,0])  drawScrew("M5x20");
 				}
 				if (i == 1) {
-				translate([20,0,-8])  rotate([0,180,90]) BeltHolder();
-				translate([20,0,509])  rotate([0,0,90]) BeltHolder();
+					translate([20,0,-8])  rotate([0,180,90]) BeltHolder();
+					translate([20,0,519])  rotate([0,0,90]) BeltTensioner();
 				} 
 			}
 		}

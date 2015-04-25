@@ -62,6 +62,11 @@ module _MXHole(name="M3", l=10, h=0, hcld=0.1)
 	hole_through(name, l=l, cld=_get_cld(name), h=h, hcld=hcld);
 }
 
+module M2_5Thread(l=10)
+{
+	rotate([180,0,0]) hole_threaded(name="M2.5", l=l, cltd=0.9);
+}
+
 module M3Hexa(l=10)
 {
 	rotate([180,0,0]) _MXHexa(name="M3", l=l);
@@ -74,7 +79,7 @@ module M3Hole(l=10)
 
 module M3Thread(l=10)
 {
-	rotate([180,0,0]) hole_threaded(name="M3", l=l, cltd=0.1);
+	rotate([180,0,0]) hole_threaded(name="M3", l=l, cltd=0.9);
 }
 
 
@@ -278,34 +283,78 @@ module NEMA17StepperMotor(length=1)
  * 0   |-----|
  * 	   0    x1   x2
  */
-module XAxisEndstopHolder(length=42, y=11)
+module EndstopHolder(length=42, y=11.5, mat=[-9.5, 9.5, -14, 6])
 {
-	mirror() assign(x1=11,x2=17,x3=8, y1=y-7,y2=y,y3=3, xx1=12.5) {
-		assign(xx2=xx1+1.80, yy1=y1+4.5) {
+	mirror() { //assign(x1=12,x2=18,x3=9, y1=y-7,y2=y,y3=3, xx1=12.5) {
+		x1 = 11.5;
+		x2 = x1 + 6;
+		x3 = x2 - 9;
+		y1 = y-7.5;
+		y2 = y;
+		y3 = 3;
+		xx1 = x1 + 1.5; 
+		xx2 = xx1 + 1.80;
+		yy1 = y1 + 4.5;
+		//assign(xx2=xx1+1.80, yy1=y1+4.5) {
 			render() difference()
 			{
 				translate([-4,1,0])  linear_extrude(height=length, center=false, convexity=0, twist=0)
 				polygon([[0,0],[x1,0],[x1,y1],[xx1,y1],[xx1,yy1],[xx2,yy1],[xx2,y1],  [x2,y1],[x2,y2],[x3,y2],[x3,y3],[0,y3]]);
 
-				rotate([90,0,0]) for (i = [-1, 1]) 
+				rotate([90,0,0]) translate([1,21,-4])
 				{
-					hull(){
-					translate([-1,21+i*9.5,-5])  rotate([0,0,0]) M3Hole(l=10);
-					translate([1,21+i*9.5,-5])  rotate([0,0,0]) M3Hole(l=10);
+					for (i = mat) 
+					{
+						//#translate([10,i,0])  rotate([0,0,0]) M3Hole(l=h);
+						hull(){
+							translate([-1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
+							translate([1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
+						}
 					}
 				}
 				translate([-4+xx1,1,length-12]) cube([x2-x1+1,y1+3,14.1]);
 			}
-		}
+		//}
 	}
 	if (showExtra) {
-		rotate([90,0,0]) for (i = [-1, 1]) 
+		rotate([90,0,0]) translate([0,21,-5]) for (i = mat) 
 		{
-			translate([-0,21+i*9.5,-4]) rotate([0,180,0]) drawBolt("M2.5x16", 12);
+			//translate([0,i,0]) rotate([0,180,0]) drawBolt("M2.5x16", 12);
+			translate([0,i,0]) rotate([0,180,0]) drawScrew("M3x8");
 		}
 	}
 }
+module XAxisEndstopHolder()
+{
+	EndstopHolder(mat=[-14, 6]);
+}
 
+module YAxisEndstopHolder()
+{
+	EndstopHolder(mat=[-14, 6]);
+}
+module XAxisEndstopHolder_deprecated()
+{
+	EndstopHolder(mat=[-9.5, 9.5]);
+}
+
+
+module EndstopHole(h, mat)
+{
+	translate([0,0,0]) for (i = mat) 
+	{
+		translate([10,i,-5])  rotate([0,0,0]) M3Thread(l=h+10);
+	}
+	translate([-12,-21,0])  cube([15,42,h]);
+}
+module XAxisEndstopHole(h)
+{
+	EndstopHole(h, mat=[-6, 14]);
+}
+module YAxisEndstopHole(h)
+{
+	EndstopHole(h, mat=[-6, 14]);
+}
 
 module plateutil_test() {
 	difference() {

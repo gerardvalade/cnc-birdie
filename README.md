@@ -9,6 +9,13 @@ nophead/Mendel90  : https://github.com/nophead/Mendel90<br/>
 fponticelli/smallbridges   :  https://github.com/fponticelli/smallbridges<br/>
 JohK/nutsnbolts  : https://github.com/JohK/nutsnbolts<br/>
 
+2015-04-26<br/>
+Add CNCZAxisView
+Add enstop adjust on z axis<br/>
+Add belt tensionner<br/>
+Correct some values<br/>
+Change screw position on XAxisEndstopHolder old value can be found on XAxisEndstopHolder_deprecated
+
 2015-04-18<br/>
 Adding some more extractor (helpfull to remove plate from the glass).<br/>
 Changing VSlotWheelSpacing20x40 value to 59.10mm.<br/>
@@ -18,5 +25,5 @@ Adding partial brim.<br/>
 Generate stl file.<br/>
 
 2015-04-21<br/>
-Adding parameter :
+Adding parameter :<br/>
 VSlotWheelSpacing20x40_X, VSlotWheelSpacing20x40_Y, VSlotWheelSpacing20x40_Z
