@@ -34,13 +34,15 @@ module CNC()
   	//$t=;
 	$fn=30;
 
+	spacer=3.2;
 
 	module bottom(length=500)
 	{
 		color(plate_color) translate([-230,0,20]) cube([460,length, 20]);
 		for(i=[-1, 1]) {
 			// Y axis rail
-			translate([i*235, 0, 40]) rotate([0, 90, 90]) {vslot20x40(length, vslot_color);
+			translate([i*(235+spacer), 0, 40]) rotate([0, 90, 90]) {
+				vslot20x40(length, vslot_color);
 				// front
 				translate([20,0,0])  rotate([0,180,90]) mirror([i+1,0,0]) JoiningPlate(front=true,right=(i==-1));
 				// back 
@@ -56,12 +58,14 @@ module CNC()
 	
 	module YAxis()
 	{
-		translate([-250,0,0]) {
-			translate([0,60,0]) rotate([90,0,-90]) PlateYAxisLeft();
-			translate([500,-60,0]) rotate([90,0,90]) PlateYAxisRight();
+		translate([0,0,0]) {
+			translate([-250-spacer,plate_width(TypeYAxisLeft)/2,0]) rotate([90,0,-90]) PlateYAxisLeft();
+			translate([250+spacer,-plate_width(TypeYAxisRight)/2,0]) rotate([90,0,90]) PlateYAxisRight();
 		}
 
-		translate([0, 20, plate_height(TypeYAxisLeft) - 21]) XAxis();
+		//translate([0, 32.4+plate_extra_width(TypeYAxisLeft), plate_height(TypeYAxisLeft) - 20]) XAxis();
+		translate([0, plate_width(TypeYAxisLeft)/2+plate_extra_width(TypeYAxisLeft)-27.5, plate_height(TypeYAxisLeft) - 20]) XAxis();
+		//translate([0, plate_width(TypeYAxisLeft)/2+plate_extra_width(TypeYAxisLeft), plate_height(TypeYAxisLeft) - 20]) XAxis();
 	}
 	
 	module XAxis()
@@ -70,23 +74,24 @@ module CNC()
 			// X axis rail
 			translate([-250, i*15, VSlotWheelMount_refY-70]) rotate([90, 90, 90]) {
 				vslot20x40(500, vslot_color);
-				for(j=[-1,1]) {
-					if (i == -1)
-						translate([j*10,0,-8]) rotate([180,0,0])  drawScrew("M5x20");
-					if (i == -1)
-						translate([j*10,0,508]) rotate([0,0,0])  drawScrew("M5x20");
+				translate([i,0,-0]) rotate([0,180,90]) 	XAxisSpacer();
+				translate([i,0,500]) rotate([0,0,90]) XAxisSpacer();
+				for(j=[-10,10]) {
+						translate([j,0,-8-spacer]) rotate([180,0,0])  drawScrew("M5x20");
+						translate([j,0,508+spacer]) rotate([0,0,0])  drawScrew("M5x20");
 				}
-				if (i == 1) {
-					translate([20,0,-8])  rotate([0,180,90]) BeltHolder();
-					translate([20,0,519])  rotate([0,0,90]) BeltTensioner();
+				if (i == 1 && showModule) {
+					translate([20,0,-8-spacer])  rotate([0,180,90]) BeltHolder3();
+					translate([20,0,518+spacer])  rotate([0,0,90]) BeltTensioner();
+					//translate([-15,12.5,-10])  rotate([-90,180,0]) XAxisEndstopHolder();
 				} 
 			}
 		}
 	
-		translate([-186+$t*360,-0,-41]) {
+		translate([-186+$t*360+4,-0,-41]) {
 			assign(w=30) {
-				translate([60,w,0]) rotate([90,0,180]) PlateXAxisBack();
-				translate([-60,-w,0]) rotate([90,0,0]) ZAxisMountView(t=1);
+				translate([plate_width(TypeXAxisBack)/2,w,0]) rotate([90,0,180]) PlateXAxisBack();
+				translate([-plate_width(TypeXAxisFront)/2,-w,0]) rotate([90,0,0]) ZAxisMountView(t=1);
 			}
 		}
 	}

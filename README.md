@@ -9,6 +9,15 @@ nophead/Mendel90  : https://github.com/nophead/Mendel90<br/>
 fponticelli/smallbridges   :  https://github.com/fponticelli/smallbridges<br/>
 JohK/nutsnbolts  : https://github.com/JohK/nutsnbolts<br/>
 
+2015-05-26<br/>
+Redesign Y axis plates<br/>
+Belts holder reinforcements<br/>
+Add X axis spacer for angular adjustement<br/>
+
+2015-05-16<br/>
+Optimize X axis position on Y axis frame<br/>
+Simplify end stop holder<br/>
+ 
 2015-04-26<br/>
 Add CNCZAxisView
 Add enstop adjust on z axis<br/>

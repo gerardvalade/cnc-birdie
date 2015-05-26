@@ -24,6 +24,8 @@ include <vitamins/stepper-motors.scad>
 include <vitamins/belts.scad>
 include <vitamins/pullies.scad>
 include <vitamins/springs.scad>
+include <endstop.scad>
+
 
 stepper_body_color = [0.27, 0.27, 0.3];
 stepper_cap_color = Aluminum;
@@ -42,10 +44,10 @@ exploded=0;
 // clearance  : desc, cld=dia clearance, clk=dia hexagone clearance 
 data_screw_cl = [
                 ["M2.5",  0.30,  0.20],
-                ["M3",    0.40,  0.25],
-                ["M4",    0.40,  0.30],
-                ["M5",    0.40,  0.30],
-                ["M8",    0.42,  0.30]
+                ["M3",    0.45,  0.25],
+                ["M4",    0.45,  0.30],
+                ["M5",    0.46,  0.30],
+                ["M8",    0.44,  0.30]
                 ];
 function _get_cl(n)  = data_screw_cl[search([n], data_screw_cl)[0]];
 function _get_cld(n) = _get_cl(n)[1]; // dia clearance 
@@ -157,7 +159,7 @@ module drawBoltLowProfile(name, posNut=10)
 }
 
 /* Nema Hole */
-module NemaHolder(depth=10, nemaHoldeRad=11.4, nema17=true, nema23=false, gap=0, showMotor=0, rot=0, mat=[[-1, 1],[-1, -1],[1, 1],[1,-1]]) {
+module NemaHolder(depth=10, nemaHoldeRad=11.5, nema17=true, nema23=false, gap=0, showMotor=0, rot=0, mat=[[-1, 1],[-1, -1],[1, 1],[1,-1]]) {
 	
 	
 	if (showMotor) {
@@ -274,6 +276,42 @@ module NEMA17StepperMotor(length=1)
 	}
 }
 
+module AngularSpacer2()
+{
+	$fn=60;
+	heigth=40;
+	large=20;
+	radius=10;
+	color("red") difference() {
+		translate([-5,0,0])  cube([10,large,heigth], center=true);
+		translate([-11,0,0])  cube([10,large+.2,heigth+1], center=true);
+		translate([-radius,0,0]) difference() {
+			translate([0,0,0])  cube([60,60,heigth+1], center=true);
+			translate([0,0,0])  cylinder(r=radius,h=heigth+2, center=true);
+		}
+		translate([-8,0,10])  rotate([0,90,0])  M5Hole(l=10);
+		translate([-8,0,-10])  rotate([0,90,0])  M5Hole(l=10);
+	}
+}
+module XAxisSpacer()
+{
+	$fn=60;
+	long=41;
+	large=20;
+	height=3.2;
+	radius=20;
+	color("red") render() difference() {
+		translate([0,0,height/2])  cube([large,long,height], center=true);
+		translate([0,0,-radius+height]) rotate([90,0,0])  difference() {
+			translate([0,0,0])  cube([radius*1.5,radius*2+5,long+1], center=true);
+			translate([0,0,0])  cylinder(r=radius,h=long+2, center=true);
+		}
+		translate([-0,10,-1])  rotate([0,0,0])  M5Hole(l=20);
+		translate([-0,-10,-1])  rotate([0,0,0])  M5Hole(l=20);
+		translate([-4,15,-10]) cube([8,3,21]);
+	}
+}
+
 
 /*
  *    	  x3
@@ -283,9 +321,94 @@ module NEMA17StepperMotor(length=1)
  * 0   |-----|
  * 	   0    x1   x2
  */
-module EndstopHolder(length=42, y=11.5, mat=[-9.5, 9.5, -14, 6])
+
+module XAxisEndstopHolder(hole=false,l=10)
 {
-	mirror() { //assign(x1=12,x2=18,x3=9, y1=y-7,y2=y,y3=3, xx1=12.5) {
+	mat=[-25,25];
+	module hole()
+	{
+		rotate([0,0,0]) translate([0,0,-0.1])
+		{
+			for (i = mat) 
+			{
+				//if (hole) translate([i,5,-l+0.1])  rotate([0,0,0]) M3Hole(l=l+0.1);
+				if (!hole)
+					hull(){
+						translate([i,5+1,0])  rotate([0,0,0]) M3Hole(l=10);
+						translate([i,5-10,0])  rotate([0,0,0]) M3Hole(l=10);
+					}
+			}
+		}
+	}
+	module holder(length=42, y=19.5)
+	{
+		x1 = 4;
+		z = -3;
+		difference()
+		{
+			union() {
+				difference()
+				{
+					//translate([-30,0,0]) cube([60,10,x1], center=false);
+					translate([-30,-10,0]) cube([60,20,x1], center=false);
+					//#translate([-21,0,4+z]) cube([42,20,3], center=false);
+					//#translate([-21,2,5+z]) cube([42,40,20], center=false);
+				}
+				translate([-0,-10,z])
+				{ 
+					difference()
+					{
+						translate([-20,0,-z]) cube([40,12,10], center=false);
+						translate([-30,8,6]) cube([60,40,1.4], center=false);
+						translate([-25,8,6]) cube([20,20,10], center=false);
+					}
+				}
+			}
+			translate([-21,2,4+z]) cube([42,20,10], center=false);
+			hole(mat);
+		}
+		if (showExtra) {
+			rotate([0,0,0]) translate([0,0,-5])// for (i = mat) 
+			{
+				translate([mat[1],5-9,9]) rotate([0,0,0]) drawScrew("M3x8");
+				translate([mat[0],5-9,9]) rotate([0,0,0]) drawScrew("M3x8");
+			}
+			translate([-17,10,6+z]) rotate([-0,0,0]) endstop();
+		}
+	}
+
+	if (hole) hole();
+	else holder();
+	//EndstopHolder2(mat=[-14, 6]);
+}
+
+/*
+ *    	  x3
+ * y2     |-------|
+ * y3  |--|       |
+ * y1  |     |----|
+ * 0   |-----|
+ * 	   0    x1   x2
+ */
+
+module YAxisEndstopHolder(hole=false,mat=[-14, 6],length=42, y=11.5)
+{
+	module hole()
+	{
+		rotate([90,0,0]) translate([1,21,-4])
+		{
+			for (i = mat) 
+			{
+				if (hole) translate([0,i,0])  rotate([0,0,0]) M3Hole(l=10);
+				else hull(){
+					translate([-1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
+					translate([1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
+				}
+			}
+		}
+	}
+	module holder() {
+	mirror() { 
 		x1 = 11.5;
 		x2 = x1 + 6;
 		x3 = x2 - 9;
@@ -295,50 +418,47 @@ module EndstopHolder(length=42, y=11.5, mat=[-9.5, 9.5, -14, 6])
 		xx1 = x1 + 1.5; 
 		xx2 = xx1 + 1.80;
 		yy1 = y1 + 4.5;
-		//assign(xx2=xx1+1.80, yy1=y1+4.5) {
-			render() difference()
-			{
-				translate([-4,1,0])  linear_extrude(height=length, center=false, convexity=0, twist=0)
-				polygon([[0,0],[x1,0],[x1,y1],[xx1,y1],[xx1,yy1],[xx2,yy1],[xx2,y1],  [x2,y1],[x2,y2],[x3,y2],[x3,y3],[0,y3]]);
+		render() difference()
+		{
+			translate([-4,1,0])  linear_extrude(height=length, center=false, convexity=0, twist=0)
+			polygon([[0,0],[x1,0],[x1,y1],[xx1,y1],[xx1,yy1],[xx2,yy1],[xx2,y1],  [x2,y1],[x2,y2],[x3,y2],[x3,y3],[0,y3]]);
 
-				rotate([90,0,0]) translate([1,21,-4])
+			hole();
+			/*rotate([90,0,0]) translate([1,21,-4])
+			{
+				for (i = mat) 
 				{
-					for (i = mat) 
-					{
-						//#translate([10,i,0])  rotate([0,0,0]) M3Hole(l=h);
-						hull(){
-							translate([-1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
-							translate([1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
-						}
+					//#translate([10,i,0])  rotate([0,0,0]) M3Hole(l=h);
+					hull(){
+						translate([-1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
+						translate([1,i,-5])  rotate([0,0,0]) M3Hole(l=10);
 					}
 				}
-				translate([-4+xx1,1,length-12]) cube([x2-x1+1,y1+3,14.1]);
-			}
-		//}
+			} */
+			translate([-4+xx1,1,length-12]) cube([x2-x1+1,y1+3,14.1]);
+		}
 	}
 	if (showExtra) {
 		rotate([90,0,0]) translate([0,21,-5]) for (i = mat) 
 		{
 			//translate([0,i,0]) rotate([0,180,0]) drawBolt("M2.5x16", 12);
-			translate([0,i,0]) rotate([0,180,0]) drawScrew("M3x8");
+			translate([0,i,0+1]) rotate([0,180,0]) drawScrew("M3x8");
+			
 		}
+		translate([-9,-4,40]) rotate([-90,90,90]) endstop();
 	}
-}
-module XAxisEndstopHolder()
-{
-	EndstopHolder(mat=[-14, 6]);
-}
+	}
+	if (hole) hole();
+	else holder();
 
-module YAxisEndstopHolder()
-{
-	EndstopHolder(mat=[-14, 6]);
+
 }
 module XAxisEndstopHolder_deprecated()
 {
-	EndstopHolder(mat=[-9.5, 9.5]);
+	YAxisEndstopHolders(mat=[-9.5, 9.5]);
 }
 
-
+/* 
 module EndstopHole(h, mat)
 {
 	translate([0,0,0]) for (i = mat) 
@@ -355,7 +475,7 @@ module YAxisEndstopHole(h)
 {
 	EndstopHole(h, mat=[-6, 14]);
 }
-
+*/
 module plateutil_test() {
 	difference() {
 		translate([-60,-60, 0]) cube([200,200,6]);

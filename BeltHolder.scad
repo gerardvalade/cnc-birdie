@@ -22,6 +22,7 @@ showExtra=0;
 showModule=0;
 
 translate([-25,-70,0]) BeltHolder();
+translate([-80,-70,0]) BeltHolder3();
 translate([25,-25,0]) JoiningPlate();
 translate([-25,25,0]) BeltTensioner();
 translate([25,70,0])  Tensioner();

@@ -17,7 +17,11 @@
 include <scad/PlateUtils.scad>
 
 $fn=30;
+showExtra=0;
+showModule=0;
 
-translate([0,0,0]) XAxisEndstopHolder(); 
-translate([30,0,0]) YAxisEndstopHolder(); 
-//translate([60,0,0]) XAxisEndstopHolder_deprecated();
+
+translate([-0,0,0]) XAxisEndstopHolder(); 
+//translate([-0,0,0]) XAxisEndstopHolder(hole=true); 
+translate([90,0,0]) YAxisEndstopHolder(); 
+//translate([90,0,0]) YAxisEndstopHolder(hole=true); 

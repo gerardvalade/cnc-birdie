@@ -18,10 +18,10 @@ include <PlateUtils.scad>
 include <endstop.scad>
 
 
-TypeYAxisLeft 	= [1, "Plate YAxisLeft",  120, 180];
-TypeYAxisRight 	= [2, "Plate YAxisRight", 120, 180];
-TypeXAxisBack 	= [3, "Plate XAxisBack",  120, 142];
-TypeXAxisFront 	= [4, "Plate XAxisFront", 120, 130];
+TypeYAxisLeft 	= [1, "Plate YAxisLeft",  110, 180, 20];
+TypeYAxisRight 	= [2, "Plate YAxisRight", 110, 180];
+TypeXAxisBack 	= [3, "Plate XAxisBack",  115, 142];
+TypeXAxisFront 	= [4, "Plate XAxisFront", 115, 130];
 TypeBottom 		= [5, "Bottom", 0, 0]; 
 SpacerLeft 		= [6, "SpacerLeft"];
 SpacerRight 	= [7, "SpacerRight"];
@@ -30,6 +30,7 @@ function plate_type(type) = type[0];
 function plate_desc(type) = type[1];
 function plate_width(type) = type[2];
 function plate_height(type) = type[3];
+function plate_extra_width(type) = TypeYAxisLeft[4];
 
 //Modules types
 function ModuleTypeYAxisLeft(type) = type[0]==1;
@@ -137,18 +138,20 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	module drawExtractor(large=5, long=8, h=0.6)
 	{
 		
-		module YaxisExtractor(pty)
+		module leftRightExtractor(pts)
 		{
-			for (i = [-1, 1]) for (y = pty) 
+			for (i = [1,-1]) for (pt = pts) for (y = pt[1])
 			{
+				x = pt[0];
 				wp = i*large;
 				hp = long;
-				render() translate([plate_width(type)/2+wp+i*50.05,y,-0.02]) 
+				render() translate([plate_width(type)/2-wp+i*x,y,-0.02]) 
 						rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
+						
 			}						
 		}
-		module XaxisExtractor(cte, ptx)
+		module topBottomExtractor(cte, ptx)
 		{
 			for (i = cte) for (x = ptx) 
 			{
@@ -162,13 +165,18 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		
 		
 		color(color_extractor) {
-			if (ModuleTypeXAxis(type)) YaxisExtractor([5, 29, 110]);
-			if (ModuleTypeYAxis(type)) YaxisExtractor([5, 29, 100, 160]);
+			ptx = plate_width(type)/2;
+			if (ModuleTypeXAxis(type)) {
+				leftRightExtractor([[ptx,[5, 29, 110]]]);
+				topBottomExtractor([1], [-21, 21]);
+			}
+			if (ModuleTypeYAxis(type)) {
+				leftRightExtractor([[ptx,[5,29,110]],[ptx+plate_extra_width(),[155]]]);
+				topBottomExtractor([1], [-45, 2]);
+			}
 			
-			XaxisExtractor([0], [-25, 25]);
+			topBottomExtractor([0], [-25, 25]);
 			
-			if (ModuleTypeXAxis(type)) XaxisExtractor([1], [-21, 21]);
-			if (ModuleTypeYAxis(type)) XaxisExtractor([1], [-45, 2]);
 		}
 	}
 
@@ -176,15 +184,18 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 		color(color_brim) {
 			if (ModuleTypeYAxis(type)) {
-				assign(wp=55,hp=55, ww=10) {
-				translate([plate_width(type)/2-wp+(wp+9),plate_height(type)-hp-5,0]) 
+				assign(wp=60,hp=60, ww=10, sqr=1.414) {
+				translate([plate_width(type)/2+(plate_width(type)/2-51),plate_height(type)-hp,0]) 
+				//translate([plate_width(type)/2-wp+(wp+9),plate_height(type)-hp-5,0]) 
 						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0) {
 						//polygon(points=[[wp-ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-ww,hp+ww],[-ww,hp],[0,hp],[wp-ww,ww]]);
-						polygon(points=[[wp-ww,-ww],[wp,-ww],[wp,ww+2],[7,hp+5],[-5,hp+5],[wp-ww,ww]]);
+						//polygon(points=[[wp-ww+0,-ww],[wp,-ww],[wp,ww*1.414],[ww*1.414,hp+5],[1,hp+5],[wp-ww+0,ww]]);
+						polygon(points=[[wp-ww+0,-15],[wp,-15],[wp,ww*sqr],[ww*sqr,hp],[1,hp],[wp-ww+0,ww]]);
 					}
 				}
-				assign(wp=-15,hp=15, ww=10) {
-				translate([plate_width(type)/2+wp-34,plate_height(type)-hp-5,0]) 
+				assign(wp=-15,hp=22, ww=8) {
+				translate([plate_width(type)/2-plate_extra_width()-(plate_width(type)/2)+7.2,plate_height(type)-hp-5,0]) 
+				//translate([plate_width(type)/2-plate_extra_width()+wp-38,plate_height(type)-hp-5,0]) 
 						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0) {
 						//polygon(points=[[wp+ww,0],[wp,0],[wp,hp+ww],[ww,hp+ww],[ww,hp],[wp+ww,hp]]);
 						polygon(points=[[wp+ww,0],[wp,0],[wp,hp+5],[wp+ww,hp+5]]);
@@ -195,13 +206,16 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			{
 				if (ModuleTypeXAxis(type)) {
 					assign(wp=i*30,hp=30, ww=10) {
-					translate([plate_width(type)/2+wp+i*5,plate_height(type)-hp-1,0]) 
+					translate([plate_width(type)/2+i*(plate_width(type)/2-25),plate_height(type)-hp-1,0]) 
+					//translate([plate_width(type)/2+wp+i*5,plate_height(type)-hp-1,0]) 
 							rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
-							polygon(points=[[wp-i*ww,-ww],[wp,-ww],[wp,0],[wp,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww,ww]]);
+							polygon(points=[[wp-i*ww+i*4,-ww],[wp+i*2,-ww],[wp+i*2,ww],[0,hp+ww],[-i*ww,hp+ww],[-i*ww,hp],[0,hp],[wp-i*ww+i*3,ww]]);
 					}
 				}
-				assign(wp=i*9,hp=40) {
-					translate([plate_width(type)/2+wp+i*49,-0,0]) 
+				
+				assign(wp=i*8,hp=42) {
+					//translate([plate_width(type)/2+wp+i*51.8,-0,0]) 
+					translate([plate_width(type)/2+i*(plate_width(type)/2-0.1),-0,0]) 
 						rotate([0,0,0]) linear_extrude(height = brimHeight, center = false, convexity = 0, twist = 0)
 						polygon(points=[[0,0],[wp,0],[wp,hp],[0,hp]]);
 				}
@@ -214,15 +228,16 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 	{
 		module XAxisEndstop(endstop)
 		{
-			if (endstop==1 && showModule) {
-				translate([2,plate_height(type)-65,3+exploded*15]) rotate([-90,0,90]) endstop();
-				translate([10,plate_height(type)-27,PlateThickness+exploded*25]) rotate([90,0,0])  XAxisEndstopHolder();
-	
-			} else if (endstop==0) {
-				translate([0,plate_height(type)-48,-0.5])   
-				{
-					XAxisEndstopHole(h=PlateThickness+2);
+			translate([0,0,0]) {
+				translate([0,plate_height(type)-6,9+exploded*25]) rotate([-90,0,90]) {
+					if (endstop==1 && showModule) {
+						XAxisEndstopHolder();
+					} else if (endstop==0) {
+						XAxisEndstopHolder(hole=true);
+					}
+					
 				}
+
 			}
 		}
 	
@@ -230,6 +245,10 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		if (addBrims) {
 			drawBrims();
 		}
+		
+		hh=45;
+		ww=plate_extra_width(type);
+		
 		difference() 
 		{
 			color(color_module_plateY)  union() {
@@ -241,16 +260,29 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 
 				difference() 
 				{
-	   				cube([plate_width(type),plate_height(type),PlateThickness]);
-
+					
+					union() {
+	   					cube([plate_width(type),plate_height(type),PlateThickness]);
+	   					translate([-ww,plate_height(type)-hh,0]) cube([ww,hh,PlateThickness]);
+	   					//translate([-ww-6.5,plate_height(type)-hh,-0.1]) cube([20,42,PlateThickness]);
+	   					
+						assign(wp=8) {
+							hp=wp;
+							translate([-wp,plate_height(type)-hh-hp,0]) 
+								rotate([0,0,0]) linear_extrude(height = PlateThickness, center = false, convexity = 0, twist = 0)
+								polygon(points=[[wp,0],[wp,hp],[0,hp]]);
+						}
+					}
+					
+					
 					translate([plate_width(type)/2+10,plate_height(type)-50,-1]) 
 						assign(wp=50.1,hp=50.1) {
 								rotate([0,0,0]) linear_extrude(height = PlateThickness+2, center = false, convexity = 0, twist = 0)
 								polygon(points=[[wp,0],[wp,hp],[0,hp]]);
 						}
 
-					translate([plate_width(type)/2+20,plate_height(type)-50,-1]) 
-						assign(wp=25.1,hp=25.1,hh=12) {
+					translate([plate_width(type)/2+7,plate_height(type)-50,-1]) 
+						assign(wp=34.1,hp=34.1,hh=16) {
 								rotate([0,0,0]) linear_extrude(height = PlateThickness+2, center = false, convexity = 0, twist = 0)
 								polygon(points=[[wp,0],[0,hp],[0,hp-hh],[wp-hh,0]]);
 						}
@@ -266,8 +298,8 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					
 					translate([plate_width(type)/2, 45, -0.02]) 
 						hull () {
-							translate([-15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
-							translate([15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+							translate([-25, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+							translate([25, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
 						}
 					
 				}
@@ -277,21 +309,25 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 				VSlotWheelAndNemaMotor(width=plate_width(type)-15, withNemaMotor=true);
 			
 		
+			translate([-ww,0,0]) {
+				//XAxisMountOnY(40, plate_height(type)-11, 45);
+				//XAxisMountOnY(39, plate_height(type)-11, 42);
+				//XAxisMountOnY(33, plate_height(type)-11, 42);
+				XAxisMountOnY(33, plate_height(type)-11, 42);
+				//#XAxisEndstop(0);
+			}
 			ToolMounting(plate_width(type));
 			
-			translate([0,0,0]) XAxisEndstop(0);
 		
 			drawExtractor();
 		
 			// Plate Spring part
 			if(VSlotSpacingAdjustPartType==1||VSlotSpacingAdjustPartType==3)
 			{
-				VSlotSpacingAdjustPartHole();
+				VSlotSpacingAdjustPart(partType=1);
 			}
 		
 			
-		
-			XAxisMountOnY(40, plate_height(type)-11, 45);
 	
 		} // end difference
 		
@@ -305,10 +341,11 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		
 		mountWheel(withNemaMotor=true);
 		
-		if (ModuleTypeYAxisLeft(type))
-			translate([0,0,0]) XAxisEndstop(1);
+		if (ModuleTypeYAxisLeft(type)) {
+			translate([-ww,0,0]) XAxisEndstop(1);
+		}
 		
-		if(VSlotSpacingAdjustPartType==1)
+		if(VSlotSpacingAdjustPartType==2)
 		{
 			VSlotSpacingAdjustPart2();
 		}
@@ -397,8 +434,8 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 					if(ModuleTypeXAxisBack(type))
 						translate([plate_width(type)/2, 45, -0.02]) 
 							hull () {
-								translate([-15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
-								translate([15, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+								translate([-25, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
+								translate([25, 0, 0]) cylinder(r=8,h=PlateThickness+1, center=false);
 							}
 					
 				}
@@ -420,12 +457,13 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			// Plate Spring part
 			if(VSlotSpacingAdjustPartType==1)
 			{
-				VSlotSpacingAdjustPartHole();
+				VSlotSpacingAdjustPart(partType=1);
 			}
 	
 		} // end difference
 		
-		VSlotSpacingAdjustPartScrew();
+		VSlotSpacingAdjustPart(partType=2);
+		//VSlotSpacingAdjustPartScrew();
 		
 		if(VSlotSpacingAdjustPartType==1)
 		{
@@ -467,16 +505,15 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		{
 			translate([plate_width(type)/2 ,plate_height(type)-4, 0]) {
 				if (endstop) {
-					//translate([23.7,0,-exploded*20]) rotate([0,180,0]) endstop();
-					translate([5,0,-exploded*20]) rotate([0,180,0]) endstop();
-					//translate([42.5,-0,-exploded*20]) rotate([0,180,0]) endstop();
+					translate([5,0,-1-exploded*20]) rotate([0,180,0]) endstop();
 				} 
 				for (i = [28,  9.5, -9.5, -28]) 
 				{
-					//if (endstop) translate([i,-0,-2-exploded*15]) rotate([0,180,0]) drawBolt("M2.5x16");
 					if (endstop==0) {
 						translate([i,0,-1]) rotate([0,0,0]) M2_5Thread();
-						//translate([i,-2,0]) rotate([0,0,0]) ToolMountingOne(w=5, hole="M2.5");
+					}
+					if (endstop==1 && i < 0) {
+						translate([i,0,-2.5-exploded*15]) rotate([0,180,0]) drawScrew("M2.5x8");
 					}
 				}
 			}
@@ -737,17 +774,17 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 			if (withNemaMotor)
 			{
 				
-				assign(ww=20) {
+				assign(ww=20, top=22) {
 					if (!wheel) {
 						hull()
 						{
 							translate([i*ww,0,-0.02]) 
 								BeltBearingHole(h=Hole_Plate, wheel=0);
-							translate([i*ww,21,-0.02]) 
+							translate([i*ww,top,-0.02]) 
 								BeltBearingHole(h=Hole_Plate, wheel=0);
 						}
 					} else {
-						translate([i*ww,21,-0.02]) 
+						translate([i*ww,top,-0.02]) 
 							BeltBearingHole(h=Hole_Plate, wheel=wheel);
 					}
 				}
@@ -788,94 +825,112 @@ module _plate(type) // plate_type(type), plate_width(type), plate_height(type))
 		{
 			/* Monting tool */
 			translate([width/2+i*(width/2-MountingTool_x),MountingTool_y, 0])  ToolMountingOne(w=10);
-			translate([width/2+i*(width/2-MountingTool_x),MountingTool_y+40, 0])  ToolMountingOne(w=10);
+			if (ModuleTypeXAxis(type)) {
+				translate([width/2+i*(width/2-MountingTool_x),MountingTool_y+40, 0])  ToolMountingOne(w=10);
+			}
+			if (ModuleTypeYAxis(type)) {
+				translate([width/2+i*(width/2-MountingTool_x),MountingTool_y+40, 0])  ToolMountingOne(w=10);
+				translate([width/2+i*(width/2-MountingTool_x),MountingTool_y+62, 0])  ToolMountingOne(w=10);
+			}
 		}
 	}
 	
 	
-	module XAxisMountOnY(posX, posY,TopAxisMount_w)
+	module XAxisMountOnY(posX, posY, TopAxisMount_w)
 	{
 		for (i = [-1, 0]) 
 		{
 			translate([posX,posY+i*20,PlateThickness/2]) rotate([0,0,90]) drawHul("M5", l=Hole_Plate, gap=TopAxisMount_w);
 		}
+		translate([posX-TopAxisMount_w/2-5.5,posY+5.5,-PlateThickness/2]) rotate([0,0,0]) cube([15,2.5,20]);
+		//#translate([posX-TopAxisMount_w/2+8,posY+6.25,PlateThickness/2]) rotate([0,0,90]) drawHul("M2.5", l=Hole_Plate+20, gap=15);
+		//#translate([posX-TopAxisMount_w/2-4,posY+5,-PlateThickness/2]) rotate([0,0,0]) cube([10,3,20]);
 	}
-	
-	module VSlotSpacingAdjustPart(posY=19, posX=plate_width(type)/2, posXScrew=5, posZ=VSlotSpacingAdjustThickness-5)
+
+	module VSlotSpacingAdjustPart(partType=0)
 	{
+		posX=plate_width(type)/2;
+		posY=21;
+		posXScrew=6;
+		posZ=VSlotSpacingAdjustThickness-6;
+		modelType=2;
+
 		module bump(i, posX, thick)
 		{
 			translate([posX-6+i*(posX-6),23,0]) cube([12,13,thick]);
 		}
-		for (i = [-1, 1]) 
+
+		module screw()
 		{
-			translate([posX-11+i*(posX-11),0]) cube([22,posY,VSlotSpacingAdjustThickness]);
-			if (ModuleTypeXAxisFront(type))
-				bump(i, posX, VSlotSpacingAdjustThickness);
-			else
-				bump(i, posX, VSlotSpacingAdjustThickness+6);
-
-			translate([posX-7.49+i*(posX-7.52),VSlotWheelMount_refY-7.5,0]) cube([15,15,VSlotSpacingAdjustThickness]);
-
+			if (modelType==1 && showExtra && ModuleTypeXAxisBack(type)) {
+				for (i = [-1, 1]) 
+				{
+					translate([posX+i*(posX-18),posY+9,posZ+7])
+					rotate([0,90,(i+1)*90]) 
+						drawBolt("M3x16", 16);
+				}
+			}
 		}
-	}
 
-	module VSlotSpacingAdjustPartScrew(posY=19, posX=plate_width(type)/2, posXScrew=5, posZ=VSlotSpacingAdjustThickness-5)
-	{
-		if (showExtra && ModuleTypeXAxisBack(type)) {
+		module hole() 
+		{
 			for (i = [-1, 1]) 
 			{
-				translate([posX+i*(posX-15),posY+11,posZ+6])
-				rotate([0,90,(i+1)*90]) 
-					drawBolt("M3x16", 14);
-			}
-		}
-	}
-
-	module VSlotSpacingAdjustPartHole(posX=plate_width(type)/2, 
-			posY=21, 
-			posXScrew=6, 
-			posZ=VSlotSpacingAdjustThickness-6)
-	{
-		for (i = [-1, 1]) 
-		{
-			translate([posX+i*(posX-15)-0,posY,VSlotSpacingAdjustThickness/2]) 
-	   			cube([35,4,VSlotSpacingAdjustThickness+2], center=true);
-			translate([posX+i*(posX-30),posY,-1])  
-				cylinder(d=8,h=PlateThickness+4);
-			
-			if (!ModuleTypeXAxisFront(type)) {
-				if (VSlotSpacingAdjustPartType==3) {
-					translate([posX+i*(posX-20),posY+9,0])
-						rotate([0,0,(i+1)*90]) { 
-							M3Hole(l=12);
-						}
-					translate([posX+i*(posX-5),posY+9,0])
-						rotate([0,0,(i+1)*90]) { 
-							M3Hole(l=12);
-						}
-				}
-				if (VSlotSpacingAdjustPartType==1) {
-					// endstop screw hole 
-					translate([posX+i*(posX+1),posY+9,VSlotSpacingAdjustThickness+1])
-						rotate([0,90,(i+1)*90]) { 
-							M3Hole(l=15);
-							translate([0,0,0.9]) M3Hexa(l=4);
-						}
-				}
-			}
-			if (VSlotSpacingAdjustPartType==1&&posXScrew>0) {
-				// Adjust hole screw
-				translate([posX+i*(posX-posXScrew),-0.02,posZ])
-				{
-					rotate([90,90,0]) {
-						translate([0,0,-42]) M3Hexa(l=12);
-						drawM3HoleThrought(l=25, h=14);
+				translate([posX+i*(posX-15)-0,posY,VSlotSpacingAdjustThickness/2]) 
+		   			cube([35,4,VSlotSpacingAdjustThickness+2], center=true);
+				translate([posX+i*(posX-33),posY,-1])  
+					cylinder(d=10,h=PlateThickness+4);
+				
+				if (!ModuleTypeXAxisFront(type)) {
+					if (VSlotSpacingAdjustPartType==3) {
+						#translate([posX+i*(posX-20),posY+9,0])
+							rotate([0,0,(i+1)*90]) { 
+								M3Hole(l=12);
+							}
+						#translate([posX+i*(posX-5),posY+9,0])
+							rotate([0,0,(i+1)*90]) { 
+								M3Hole(l=12);
+							}
 					}
-					
+					if (modelType==1&&VSlotSpacingAdjustPartType==1) {
+						// endstop screw hole 
+						translate([posX+i*(posX+1),posY+9,VSlotSpacingAdjustThickness+1])
+							rotate([0,90,(i+1)*90]) { 
+								M3Hole(l=15);
+								translate([0,0,0.9]) M3Hexa(l=4);
+							}
+					}
+				}
+				if (VSlotSpacingAdjustPartType==1&&posXScrew>0) {
+					// Adjust hole screw
+					translate([posX+i*(posX-posXScrew),-0.02,posZ])
+					{
+						rotate([90,90,0]) {
+							translate([0,0,-42]) M3Hexa(l=12);
+							drawM3HoleThrought(l=25, h=14);
+						}
+						
+					}
 				}
 			}
 		}
+
+		module main() {
+			for (i = [-1, 1]) 
+			{
+				translate([posX-11+i*(posX-11),0]) cube([22,posY,VSlotSpacingAdjustThickness]);
+				if (ModuleTypeXAxisFront(type) || modelType!=1)
+					bump(i, posX, VSlotSpacingAdjustThickness);
+				else
+					bump(i, posX, VSlotSpacingAdjustThickness+6);
+	
+				translate([posX-7.49+i*(posX-7.52),VSlotWheelMount_refY-7.5,0]) cube([15,15,VSlotSpacingAdjustThickness]);
+			}
+		}
+
+		if (partType==0) main();
+		if (partType==1) hole();
+		if (partType==2) screw();
 	}
 
 	module VSlotSpacingAdjustPart2(posY=19, posX=plate_width(type)/2, posXScrew=6, posZ=VSlotSpacingAdjustThickness-6)
@@ -1123,7 +1178,7 @@ module ZAxisPlateMotorHolder(width=70, height=75,thick=8, nemaHight=40, posNema=
 	}
 }
 	
-module BeltHolder(h=40.5)
+module BeltHolder(front,h=40.5)
 {
 
 	tensionL=25;
@@ -1131,22 +1186,96 @@ module BeltHolder(h=40.5)
 	tensionH=4.5;
 
 	translate([0, 0, tensionH])  rotate([0,180,0]) { 
-	 difference() {
-		translate([-25/2,0,0])	cube([25,75,tensionH]);
-		for(i=[10, 30]) { 
-			translate([0,i,-20.2]) M5Hole(l=41);
+		difference() {
+			union(){
+				translate([-tensionL/2,0,0])	cube([25,75,tensionH]);
+				translate([-tensionL/2,0,-3])	cube([3,75,tensionH]);
+				translate([tensionL/2-3,0,-3])	cube([3,75,tensionH]);
+			}
+			for(i=[10, 30]) { 
+				translate([0,i,-20.2]) M5Hole(l=41);
+			}
+			for(i=[35,45,55,66]) { 
+				translate([-8/2,i,-0.1]) cube([8,3,h+1]);
+			}
 		}
-		for(i=[35,45,55,64]) { 
-			translate([-8/2,i,-0.1]) cube([8,3,h+1]);
+		if (showExtra) {
+			for(i=[10, 30]) { 
+				if (front)
+				translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x16");
+				else
+				translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x20");
+			}
 		}
-	}
-	if (showExtra) {
-		for(i=[10, 30]) { 
-			translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x16");
-		}
-	}
 	}
 }
+module BeltHolder2(h=40.5)
+{
+
+	tensionL=25;
+	tensionW=16;
+	tensionH=4.5;
+
+	translate([0, 0, tensionH])  rotate([0,180,0]) { 
+		difference() {
+			union() {
+				translate([-tensionL/2,18,0])	cube([25,55,tensionH]);
+				translate([-40,18,0])	cube([50,23,tensionH]);
+				translate([-tensionL/2,18,-3])	cube([3,55,tensionH]);
+				translate([tensionL/2-3,18,-3])	cube([3,55,tensionH]);
+			}
+			for(i=[30]) { 
+				translate([0,i,-20.2]) M5Hole(l=41);
+				translate([-25,i,0])  rotate([0,0,90])  drawHul("M5",gap=15);
+			}
+			for(i=[35,45,55,66]) { 
+				translate([-8/2,i,-0.1]) cube([8,3,h+1]);
+			}
+		}
+		if (showExtra) {
+			for(i=[30]) { 
+				translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x20");
+				translate([-30,i, 0])  rotate([0,180,0]) drawScrew("M5x20");
+			}
+		}
+	}
+}
+module BeltHolder3(front,h=40.5)
+{
+
+	tensionL=25;
+	tensionW=16;
+	tensionH=4.5;
+
+	translate([0, 0, tensionH])  rotate([0,180,0]) { 
+		difference() {
+			union(){
+				translate([-tensionL/2,0,0])	cube([25,75,tensionH]);
+				translate([-tensionL/2,0,-3])	cube([3,75,tensionH]);
+				translate([tensionL/2-3,0,-3])	cube([3,75,tensionH]);
+				translate([tensionL/2-5,5,-7]) cube([5,60,tensionH+7]);
+			}
+			for(i=[10, 30]) { 
+				translate([0,i,-20.2]) M5Hole(l=41);
+			}
+			for(i=[35,45,55,66]) { 
+				translate([-8/2,i,-0.1]) cube([8,3,h+1]);
+			}
+			for(i=[10, 60]) { 
+				translate([6,i,-2]) rotate([0,90,0]) M3Thread(l=10);
+			}
+		}
+		if (showExtra) {
+			for(i=[10, 30]) { 
+				if (front)
+				translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x16");
+				else
+				translate([0,i, 0])  rotate([0,180,0]) drawScrew("M5x20");
+			}
+		}
+	}
+}
+
 
 module BeltTensioner(h=40.5)
 {
@@ -1161,6 +1290,8 @@ module BeltTensioner(h=40.5)
 			union() {
 				translate([-tensionL/2,0,0]) cube([tensionL,75,tensionH]);
 				translate([-tensionL/2,tensionY-tensionW/2,-3.9]) cube([tensionL,tensionW,3.9]); //cylinder(d=16, h=5);
+				translate([-tensionL/2,0,-3])	cube([3,75,tensionH]);
+				translate([tensionL/2-3,0,-3])	cube([3,75,tensionH]);
 			}
 			for(i=[10, 30]) { 
 				translate([0,i,-20.2]) M5Hole(l=41);
@@ -1204,7 +1335,7 @@ module Tensioner()
 				}
 			}
 			translate([0,0,tensionH/2+1.5]) cube([8,30,3.6], center=true);
-			#translate([0,0,-9.8]) rotate([0,0,0]) M5Hole();
+			translate([0,0,-9.9]) rotate([180,0,0]) _MXHole(name="M5", l=10, hcld=1.0);
 		}
 	}
 }
@@ -1213,18 +1344,27 @@ module Tensioner()
 
 module JoiningPlate(front, right, h=4.5)
 {
+	modelType=2;
 	module Endstop(endstop)
 	{
+		translate([8.5,40,3]) rotate([90,0,0])  {
+			if (endstop==1 && showModule) 
+				YAxisEndstopHolder();
+			else if (endstop==0)
+				YAxisEndstopHolder(hole=true);
+		}
+/*
 		if (endstop==1 && showModule) {
-			translate([0,0,0]) rotate([-90,0,90]) endstop();
-			translate([8.5,40,3]) rotate([90,0,0])  YAxisEndstopHolder();
+			//translate([0,0,0]) rotate([-90,0,90]) endstop();
+			#translate([8.5,40,3]) rotate([90,0,0])  YAxisEndstopHolder();
 
 		} else if (endstop==0) {
 			translate([0,plate_height(type)-48,-0.5])   
 			{
-				YAxisEndstopHole(h=PlateThickness+2);
+				#YAxisEndstopHole(h=PlateThickness+2);
+				#YAxisEndstopHolder(hole=true);
 			}
-		}
+		}*/
 	}
 
 
@@ -1234,7 +1374,8 @@ module JoiningPlate(front, right, h=4.5)
 		translate([-25/2,-40,0]) assign(wp=25,hp=115) {
 			rotate([0,0,0]) linear_extrude(height = h, center = false, convexity = 0, twist = 0)
 			//polygon(points=[[0,0],[wp+30,0],[wp+30,40],[wp,70],[wp,hp],[0,hp]]);
-			polygon(points=[[-8,0],[wp+30,0],[wp+30,40],[wp,80],[0,80],[0,60],[-8,60]]);
+			if(modelType==1) polygon(points=[[-8,0],[wp+30,0],[wp+30,40],[wp,80],[0,80],[0,60],[-8,60]]);
+			else if(modelType==2) polygon(points=[[0,0], [wp+30,0],[wp+30,40],[wp,80],[0,80]]);
 		}
 
 		for(i=[10, 30]) { 
@@ -1243,24 +1384,25 @@ module JoiningPlate(front, right, h=4.5)
 				translate([j,-i,-20.2]) M5Hole(l=41);
 			}
 		}
-		for(i=[35,45,55,64]) { 
+		for(i=[35]) { 
 			translate([-8/2,i,-0.1])	cube([8,3,h+1]);
 		}
-		translate([-24.5, -4, 0]) Endstop(0);
+		//translate([-24.5, -4, 0]) Endstop(0);
+		if(modelType==1) translate([-23, -23, 0]) Endstop(0);
 	}
 	if (showExtra) {
 		if (front) {
-			if(right) translate([-23, -23, 0]) Endstop(1);
+			if(right && modelType==1) translate([-23, -23, 0]) Endstop(1);
 			for(i=[10, 30]) { 
 				//translate([0,i, h]) drawScrew("M5x20");
 				for(j=[0,30]) { 
 					translate([j,-i,h]) drawScrew("M5x10");
 				}
 			}
-			translate([0, 0, 9])  rotate([0,0,0])  BeltHolder();
+			translate([0, 0, 4.6])  rotate([0,0,0])  BeltHolder(front);
 		}
 		if(!front) {
-			if(!right)	translate([-23, -23, 0]) Endstop(1);
+			if(!right && modelType==1)	translate([-23, -23, 0]) Endstop(1);
 			translate([0, 0, 14])  rotate([0,0,0])  BeltTensioner();
 		}
 	}
@@ -1304,7 +1446,7 @@ module ModuleBottom() {
 module ZAxisMountView(t=0.9)
 {
 	translate([0,0,0])  PlateXAxisFront();
-	translate([60,180-t*48,42+exploded*50]) {
+	translate([plate_width(TypeXAxisFront)/2,180-t*48,42+exploded*50]) {
 		// Z axis rail
 		translate([0,0,0]) rotate([90, 0, 0]) {
 			vslot20x40(190, vslot_color);
