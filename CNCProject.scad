@@ -46,13 +46,29 @@ module CNC()
 				// front
 				translate([20,0,0])  rotate([0,180,90]) mirror([i+1,0,0]) JoiningPlate(front=true,right=(i==-1));
 				// back 
-				translate([20,0,500])  rotate([0,0,90]) mirror([i-1,0,0]) JoiningPlate(front=false,right=(i==-1)); 
+				translate([20,0,500])  rotate([0,0,90]) mirror([i-1,0,0]) JoiningPlate(front=false,right=(i==-1));
 			}
+
 			
 			// Bottom rail	
 			translate([-250, length/2+ length/2*i-i*10, 0]) rotate([90, 90, 90]) vslot20x40(500, vslot_color);
+
 		}
 
+		 
+		translate([250, 480, -20]) square_chain_link_holder_back();
+
+		translate([250, 20, -20]) square_chain_link_holder_front();
+
+		// Chain link
+		translate([270, 465, -20+7]) {
+			 chain_link_yaxis_static();
+			 for(i=[-1: -10]) chain_link(pos=i);
+		}
+		
+		translate([270, 5, -20+5]) cube([20,490,2]);
+
+		// Y AXIS
 		translate([0,length-80-$t*(length-160), 70-VSlotWheelMount_refY]) YAxis();
 	}
 	
@@ -81,8 +97,8 @@ module CNC()
 						translate([j,0,508+spacer]) rotate([0,0,0])  drawScrew("M5x20");
 				}
 				if (i == 1 && showModule) {
-					translate([20,0,-8-spacer])  rotate([0,180,90]) BeltHolder3();
-					translate([20,0,518+spacer])  rotate([0,0,90]) BeltTensioner();
+					translate([20,0,-8-spacer])  rotate([0,180,90]) BeltHolderES();
+					translate([20,0,518+spacer])  rotate([0,0,90]) BeltTensionerCH();
 					//translate([-15,12.5,-10])  rotate([-90,180,0]) XAxisEndstopHolder();
 				} 
 			}

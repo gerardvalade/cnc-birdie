@@ -52,7 +52,7 @@ module platesZAxis_test()
 	translate([0,140,0]) rotate([0,0,90])  AntiBacklash();
 	translate([0,80,0])  XAxisEndstopHolder();
 	translate([90,-50,0]) BeltHolder();
-	translate([140,-50,0]) BeltHolder3();
+	translate([140,-50,0]) BeltHolderES();
 	translate([180,-10,0]) XAxisSpacer();
 	translate([150,90,0]) JoiningPlate();
 	translate([90,50,0]) BeltTensioner();

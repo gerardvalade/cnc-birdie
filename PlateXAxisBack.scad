@@ -19,5 +19,5 @@ include <scad/PlateAxis.scad>
 $fn=30;
 cutView=0;
 showExtra=0;
-showModule=0;
+showModule=1;
 PlateXAxisBack(); 

@@ -276,43 +276,6 @@ module NEMA17StepperMotor(length=1)
 	}
 }
 
-module AngularSpacer2()
-{
-	$fn=60;
-	heigth=40;
-	large=20;
-	radius=10;
-	color("red") difference() {
-		translate([-5,0,0])  cube([10,large,heigth], center=true);
-		translate([-11,0,0])  cube([10,large+.2,heigth+1], center=true);
-		translate([-radius,0,0]) difference() {
-			translate([0,0,0])  cube([60,60,heigth+1], center=true);
-			translate([0,0,0])  cylinder(r=radius,h=heigth+2, center=true);
-		}
-		translate([-8,0,10])  rotate([0,90,0])  M5Hole(l=10);
-		translate([-8,0,-10])  rotate([0,90,0])  M5Hole(l=10);
-	}
-}
-module XAxisSpacer()
-{
-	$fn=60;
-	long=41;
-	large=20;
-	height=3.2;
-	radius=20;
-	color("red") render() difference() {
-		translate([0,0,height/2])  cube([large,long,height], center=true);
-		translate([0,0,-radius+height]) rotate([90,0,0])  difference() {
-			translate([0,0,0])  cube([radius*1.5,radius*2+5,long+1], center=true);
-			translate([0,0,0])  cylinder(r=radius,h=long+2, center=true);
-		}
-		translate([-0,10,-1])  rotate([0,0,0])  M5Hole(l=20);
-		translate([-0,-10,-1])  rotate([0,0,0])  M5Hole(l=20);
-		translate([-4,15,-10]) cube([8,3,21]);
-	}
-}
-
-
 /*
  *    	  x3
  * y2     |-------|
