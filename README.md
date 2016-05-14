@@ -11,6 +11,7 @@ JohK/nutsnbolts  : https://github.com/JohK/nutsnbolts<br/>
 
 2016-05-14<br/>
 Add antibackslash for T8 nut<br/>
+Add TB650 holder<br/>
 
 2015-06-08<br/>
 Add cable chain<br/>
