@@ -451,6 +451,22 @@ module plateutil_test() {
 }
 
 
+module brassT8Nut()
+{
+	difference() {
+		union() {
+		translate([0, 0, 0]) cylinder(d=10.2, h=15);
+		translate([0, 0, 1.5]) cylinder(d=22, h=3.5);
+		
+		}  
+		translate([0, 0, -0.1]) cylinder(d=8, h=16);
+		for(rr=[0, 90, -90, 180])
+			rotate([0, 0, rr]) translate([8, 0, -2]) cylinder(d=3.5, h=10);
+		
+	}
+		
+}
 
 //plateutil_test();
 //spacer_test();
+//brassT8Nut();

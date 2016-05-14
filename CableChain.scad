@@ -25,8 +25,10 @@ translate([60,0,0]) {
 	chain_link_xaxis_mobil(pos=4);
 
 	translate([60,20,0]) {
-		square_chain_link_holder_front();
-		translate([0, 60, 0]) square_chain_link_holder_back();
+		translate([0,0,20]) {
+			rotate([90,0,0]) square_chain_link_holder_front();
+			translate([0, 60, 0]) rotate([-90,0,0])  square_chain_link_holder_back();
+		}
 		chain_link_yaxis_static(pos=1);
 	
 	}

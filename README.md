@@ -9,6 +9,9 @@ nophead/Mendel90  : https://github.com/nophead/Mendel90<br/>
 fponticelli/smallbridges   :  https://github.com/fponticelli/smallbridges<br/>
 JohK/nutsnbolts  : https://github.com/JohK/nutsnbolts<br/>
 
+2016-05-14<br/>
+Add antibackslash for T8 nut<br/>
+
 2015-06-08<br/>
 Add cable chain<br/>
 

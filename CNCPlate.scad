@@ -49,7 +49,8 @@ module platesXAxis_test()
 module platesZAxis_test()
 {
 	translate([0,0,0]) ZAxisPlateMotorHolder();	
-	translate([0,140,0]) rotate([0,0,90])  AntiBacklash();
+	translate([0,140,0]) rotate([0,0,90])  AntiBacklashM8();
+	translate([0,190,0]) rotate([0,0,90])  AntiBacklashT8();
 	translate([0,80,0])  XAxisEndstopHolder();
 	translate([90,-50,0]) BeltHolder();
 	translate([140,-50,0]) BeltHolderES();
